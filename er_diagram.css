@@ -1,0 +1,20 @@
+canvas {
+  position: absolute;
+  background-color: #eee;
+  top: 0;
+  left: 0;
+}
+/*
+.table {
+  background-color:#BAD5FC;
+}
+*/
+.table div {
+  border: 1px solid black;
+  padding: 0.2em;
+  float: left;
+  margin: 0 0.2em 0 0;
+}
+.table table {
+  margin: 0.16em 0 0 0;
+}
