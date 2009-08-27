@@ -1,21 +1,63 @@
 var er = (function($) {
-  function Table(id) {
+  function Table(id, name, keyColumns, otherColumns, dataRows) {
     this.id = id;
+    this.name = name;
+    this.keyColumns = keyColumns;
+    this.otherColumns = otherColumns;
+    this.dataRows = dataRows;
     this.connectorEnds = {top: [], left: [], bottom: []};
   }
   $.extend(Table.prototype, {
-    addConnectorEnd: function(side, type) {
+    generateDivHtml: function() {
+      var chunks = [
+        '<div class="table" id="', this.id, '">',
+        '<div>', this.name, '</div>',
+        '<table><thead><tr>'
+      ];
+      var keyColumnCount = this.keyColumns.length,
+        columnCount = keyColumnCount + this.otherColumns.length;
+      for (var j = 0; j < columnCount; j++) {
+        if (j < keyColumnCount) {
+          chunks.push('<th class="key">');
+          chunks.push(this.keyColumns[j]);
+        }
+        else {
+          chunks.push('<th>');
+          chunks.push(this.otherColumns[j - keyColumnCount]);
+        }
+        if (j < columnCount - 1) {
+          chunks.push('、');
+        }
+        chunks.push('</th>');
+      }
+      chunks.push('</tr></thead><tbody>');
+      for (var i = 0, rowCount = this.dataRows.length; i < rowCount; i++) {
+        chunks.push('<tr>');
+        var row = this.dataRows[i],
+          rowValueCount = row.length;
+        for (j = 0; j < columnCount; j++) {
+          chunks.push('<td>');
+          chunks.push(j < rowValueCount ? row[j] : '&nbsp;');
+          chunks.push('</td>');
+        }
+        chunks.push('</tr>');
+      }
+      chunks.push('</tbody></table></div>');
+      return chunks.join('');
+    },
+    div: function() {
+      return $('#' + this.id + ' div');
+    },
+    addConnectorEnd: function(type, side, index) {
       if (!/top|left|bottom/.test(side)) {
         throw new Error('Invalid side parameter.');
       }
       var endsAtSide = this.connectorEnds[side],
         count = endsAtSide.length,
-        ce = new ConnectorEnd(this, type, side, count);
+        ce = new ConnectorEnd(this, type, side,
+          typeof index == 'undefined' ? count : index);
       endsAtSide.push(ce);
       return ce;
-    },
-    div: function() {
-      return $('#' + this.id + ' div');
     }
   });
 
@@ -29,7 +71,7 @@ var er = (function($) {
     FirstOffsetRatio: 0.3,
     Width: 8,
     Height: 12,
-    Margin: 2
+    Margin: 3
   });
   $.extend(ConnectorEnd.prototype, {
     point: function() {
@@ -51,6 +93,9 @@ var er = (function($) {
       case 'left':
         x = rect.x;
         y = rect.y + cssFloat(div, 'padding-top') + 0.5 * rect.h;
+        var c = this.table.connectorEnds[this.side].length,
+          wtotal = ConnectorEnd.Width * c + ConnectorEnd.Margin * (c - 1);
+        y += wm * this.index + ConnectorEnd.Width / 2 - wtotal / 2;
         break;
       }
       return {x: x, y: y};
@@ -93,7 +138,7 @@ var er = (function($) {
         switch (this.side) {
         case 'left':
           ctx.beginPath();
-          var n = 2,
+          var n = 3,
               l = h / n;
           for (var i = 0; i < n; i++) {
             var x = p.x - h + i * l;
@@ -109,37 +154,34 @@ var er = (function($) {
   });
 
   function Connector(end1, end2) {
-    this.end1 = end1;
-    this.end2 = end2;
+    this.ends = [end1, end2];
   }
   $.extend(Connector, {
     R: 10
   });
   $.extend(Connector.prototype, {
     draw: function(ctx) {
-      this.end1.draw(ctx);
-      this.end2.draw(ctx);
-      var div1 = this.end1.table.div(),
-        rect1 = rectOfElem(div1),
-        div2 = this.end2.table.div(),
-        rect2 = rectOfElem(div2),
-        r = Connector.R,
+      $.each(this.ends, function() {
+        this.draw(ctx);
+      });
+      var pts = $.map(this.ends, function(end) {
+        return end.point();
+      });
+      var r = Connector.R,
+        w = ConnectorEnd.Width,
+        h = ConnectorEnd.Height,
         x1, y1, x2, y2;
-      switch (this.end1.side + ' ' + this.end2.side) {
+      switch ($.map(this.ends, function(end) {return end.side;}).join(' ')) {
       case 'bottom left':
-        x1 = rect1.x + ConnectorEnd.FirstOffsetRatio * rect1.w;
-        y1 = rect1.y + rect1.h +
-          cssFloat(div1, 'padding-top') +
-          cssFloat(div1, 'padding-bottom') +
-          ConnectorEnd.Height;
-        x2 = rect2.x - ConnectorEnd.Height;
-        y2 = rect2.y + cssFloat(div2, 'padding-top') + 0.5 * rect2.h;
+        x1 = pts[0].x;
+        y1 = pts[0].y;
+        x2 = pts[1].x;
+        y2 = pts[1].y;
         ctx.beginPath();
-//        console.log('x1=' + x1 + '(' + typeof x1 + '), y1=' + y1 + '(' + typeof y1 + ')');
-        ctx.moveTo(x1, y1);
+        ctx.moveTo(x1, y1 + h);
         ctx.lineTo(x1, y2 - r);
         ctx.arc(x1 + r, y2 - r, r, Math.PI, 0.5 * Math.PI, true);
-        ctx.lineTo(x2, y2);
+        ctx.lineTo(x2 - h, y2);
         ctx.stroke();
         break;
       default:

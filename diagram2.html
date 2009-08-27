@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>単一テーブル複数レコード</title>
+<link rel="stylesheet" type="text/css" media="screen" href="er_diagram.css">
+<!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+<style type="text/css">
+#hinmoku_tbl {
+  position: relative;
+}
+#hinmoku_kousei_tbl {
+  position: relative;
+  top: 1em;
+  left: 3em;
+}
+</style>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="er_diagram.js"></script>
+<script type="text/javascript">
+$(function() {
+
+  var hinmoku_tbl = new er.Table('hinmoku_tbl', '品目',
+    ['品目C'], ['品目名', '製造対象', '販売対象', '購入対象'],
+    [
+      ['P100', '品目A', '○', '○', '×'],
+      ['P200', '品目B', '×', '×', '○'],
+      ['P300', '品目C', '○', '×', '×'],
+      ['P400', '品目D', '×', '×', '○'],
+      ['P500', '品目E', '×', '○', '○']
+    ])
+
+  var hinmoku_kousei_tbl = new er.Table('hinmoku_kousei_tbl', '品目構成',
+    ['親品目C', '子品目C'], ['構成比'],
+    [
+      ['P100', 'P200', 2.0],
+      ['P100', 'P300', 1.0],
+      ['P300', 'P400', 1.0],
+      ['P300', 'P500', 2.0]
+    ])
+
+  $('body').append([
+    hinmoku_tbl.generateDivHtml(),
+    hinmoku_kousei_tbl.generateDivHtml(),
+  ].join(''));
+  var canvas = document.getElementById('canvas1');
+  canvas.width = $(document).width();
+  canvas.height = $(document).height();
+
+  var ctx = canvas.getContext('2d');
+  ctx.strokeColor = 'black';
+
+  var connectors = [
+    new er.Connector(
+      hinmoku_tbl.addConnectorEnd('one', 'bottom'),
+      hinmoku_kousei_tbl.addConnectorEnd('multi', 'left', 1)
+    ),
+    new er.Connector(
+      hinmoku_tbl.addConnectorEnd('one', 'bottom'),
+      hinmoku_kousei_tbl.addConnectorEnd('multi', 'left', 0)
+    )
+  ];
+  for (var i = 0, len = connectors.length; i < len; i++) {
+    connectors[i].draw(ctx);
+  }
+});
+</script>
+</head>
+<body>
+  <canvas id="canvas1"></canvas>
+</body>
+</html>

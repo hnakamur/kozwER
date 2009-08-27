@@ -30,8 +30,8 @@ $(function() {
     kokyaku_tbl = new er.Table('kokyaku_tbl');
   var connectors = [
     new er.Connector(
-      gyoushu_tbl.addConnectorEnd('bottom', 'one'),
-      kokyaku_tbl.addConnectorEnd('left', 'ref')
+      gyoushu_tbl.addConnectorEnd('one', 'bottom'),
+      kokyaku_tbl.addConnectorEnd('ref', 'left')
     )
   ];
   for (var i = 0, len = connectors.length; i < len; i++) {
@@ -45,7 +45,7 @@ $(function() {
   <div class="table" id="gyoushu_tbl">
     <div>業種</div>
     <table>
-      <tr><th>業種C、</th><th>業種名、</th><th>…</th></tr>
+      <tr><th class="key">業種C、</th><th>業種名、</th><th>…</th></tr>
       <tr><td>10</td><td>小売業</td><td>&nbsp;</td></tr>
     </table>
   </div>
@@ -53,7 +53,7 @@ $(function() {
     <div>顧客</div>
     <table>
       <thead>
-        <tr><th>顧客C、</th><th>顧客カナ名、</th><th>顧客漢字名、</th><th>業種C、</th><th>…</th></tr>
+        <tr><th class="key">顧客C、</th><th>顧客カナ名、</th><th>顧客漢字名、</th><th>業種C、</th><th>…</th></tr>
       </thead>
       <tbody>
         <tr><td>C001</td><td>ヤマモトデンキテン</td><td>山本電器店</td><td>10</td><td>&nbsp;</td></tr>
