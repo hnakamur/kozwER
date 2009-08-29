@@ -20,24 +20,29 @@
 <script type="text/javascript">
 $(function() {
 
-  var hinmoku_tbl = new er.Table('hinmoku_tbl', '品目',
-    ['品目C'], ['品目名', '製造対象', '販売対象', '購入対象'],
-    [
+  var hinmoku_tbl = new er.Table('hinmoku_tbl', {
+    name: '品目',
+    columns: ['品目C', '品目名', '製造対象', '販売対象', '購入対象'],
+    data: [
       ['P100', '品目A', '○', '○', '×'],
       ['P200', '品目B', '×', '×', '○'],
       ['P300', '品目C', '○', '×', '×'],
       ['P400', '品目D', '×', '×', '○'],
       ['P500', '品目E', '×', '○', '○']
-    ])
+    ]
+  });
 
-  var hinmoku_kousei_tbl = new er.Table('hinmoku_kousei_tbl', '品目構成',
-    ['親品目C', '子品目C'], ['構成比'],
-    [
+  var hinmoku_kousei_tbl = new er.Table('hinmoku_kousei_tbl', {
+    name: '品目構成',
+    columns: ['親品目C', '子品目C', '構成比'],
+    pkeyColumnCount: 2,
+    data: [
       ['P100', 'P200', 2.0],
       ['P100', 'P300', 1.0],
       ['P300', 'P400', 1.0],
       ['P300', 'P500', 2.0]
-    ])
+    ]
+  });
 
   $('body').append([
     hinmoku_tbl.generateDivHtml(),

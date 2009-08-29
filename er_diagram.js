@@ -1,12 +1,18 @@
 var er = (function($) {
-  function Table(id, name, keyColumns, otherColumns, dataRows) {
+  function Table(id, settings) {
     this.id = id;
-    this.name = name;
-    this.keyColumns = keyColumns;
-    this.otherColumns = otherColumns;
-    this.dataRows = dataRows;
+    var config = $.extend({}, Table.Defaults, settings);
+    this.name = config.name;
+    this.columns = config.columns;
+    this.pkeyColumnCount = config.pkeyColumnCount;
+    this.data = config.data;
     this.connectorEnds = {top: [], left: [], bottom: []};
   }
+  $.extend(Table, {
+    Defaults: {
+      pkeyColumnCount: 1
+    }
+  });
   $.extend(Table.prototype, {
     generateDivHtml: function() {
       var chunks = [
@@ -14,26 +20,19 @@ var er = (function($) {
         '<div>', this.name, '</div>',
         '<table><thead><tr>'
       ];
-      var keyColumnCount = this.keyColumns.length,
-        columnCount = keyColumnCount + this.otherColumns.length;
+      var columnCount = this.columns.length;
       for (var j = 0; j < columnCount; j++) {
-        if (j < keyColumnCount) {
-          chunks.push('<th class="key">');
-          chunks.push(this.keyColumns[j]);
-        }
-        else {
-          chunks.push('<th>');
-          chunks.push(this.otherColumns[j - keyColumnCount]);
-        }
+        chunks.push(j < this.pkeyColumnCount ? '<th class="key">' : '<th>');
+        chunks.push(this.columns[j]);
         if (j < columnCount - 1) {
           chunks.push('、');
         }
         chunks.push('</th>');
       }
       chunks.push('</tr></thead><tbody>');
-      for (var i = 0, rowCount = this.dataRows.length; i < rowCount; i++) {
+      for (var i = 0, rowCount = this.data.length; i < rowCount; i++) {
         chunks.push('<tr>');
-        var row = this.dataRows[i],
+        var row = this.data[i],
           rowValueCount = row.length;
         for (j = 0; j < columnCount; j++) {
           chunks.push('<td>');
