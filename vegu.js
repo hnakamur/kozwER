@@ -3,9 +3,6 @@ var vegu = (function() {
       xlinkns = "http://www.w3.org/1999/xlink";
 
   function Manip(elem) {
-    if (!(this instanceof Manip))
-      return new Manip(elem);
-
     this.elem = elem;
   }
 
@@ -33,18 +30,20 @@ var vegu = (function() {
       return this;
     },
     appendNewElem: function(type, setupFn) {
-      var newElem = Manip.createElem(type),
-        args = Array.prototype.slice.call(arguments, 2);
-      if (setupFn)
-        setupFn.apply(this, [newElem].concat(args));
+      var newElem = Manip.createElem(type);
+      if (setupFn) {
+        setupFn.apply(new Manip(newElem),
+            Array.prototype.slice.call(arguments, 2));
+      }
       this.elem.appendChild(newElem);
       return this;
     },
     appendNewFragment: function(setupFn) {
-      var frag = Manip.createFragment(),
-        args = Array.prototype.slice.call(arguments, 1);
-      if (setupFn)
-        setupFn.apply(this, [frag].concat(args));
+      var frag = Manip.createFragment();
+      if (setupFn) {
+        setupFn.apply(new Manip(frag),
+            Array.prototype.slice.call(arguments, 1));
+      }
       this.elem.appendChild(frag);
       return this;
     }

@@ -5,12 +5,11 @@
 <script>
 svgweb.addOnLoad(function() {
   var svg1 = document.getElementById('svg1');
-  vegu.Manip(svg1).setAttrs({width: 640, height: 480})
-    .appendNewFragment(function(frag, n, r) {
-      var manip = vegu.Manip(frag);
+  new vegu.Manip(svg1).setAttrs({width: 640, height: 480})
+    .appendNewFragment(function(n, r) {
       for (var i = 0; i < n; i++) {
-        manip.appendNewElem('circle', function(elem) {
-          vegu.Manip(elem).setAttrs({
+        this.appendNewElem('circle', function() {
+          this.setAttrs({
             cx: i * 2 * r + r,
             cy: 150,
             r: r,
