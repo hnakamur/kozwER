@@ -8,7 +8,7 @@ svgweb.addOnLoad(function() {
   new vegu.Manip(svg1).setAttrs({width: 640, height: 480})
     .appendNewFragment(function(n, r) {
       for (var i = 0; i < n; i++) {
-        this.appendNewElem('circle', function() {
+        this.appendNewElement('circle', function() {
           this.setAttrs({
             cx: i * 2 * r + r,
             cy: 150,
