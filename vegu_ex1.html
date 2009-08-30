@@ -1,0 +1,34 @@
+<html>
+<head>
+<script src="lib/svgweb/svg.js" data-path="lib/svgweb/" data-debug="true"></script>
+<script src="vegu.js"></script>
+<script>
+svgweb.addOnLoad(function() {
+  var svg1 = document.getElementById('svg1');
+  vegu.Manip(svg1).setAttrs({width: 640, height: 480})
+    .appendNewFragment(function(frag, n, r) {
+      var manip = vegu.Manip(frag);
+      for (var i = 0; i < n; i++) {
+        manip.appendNewElem('circle', function(elem) {
+          vegu.Manip(elem).setAttrs({
+            cx: i * 2 * r + r,
+            cy: 150,
+            r: r,
+            fill: 'red'
+          });
+        });
+      }
+    }, 5, 20);
+});
+</script>
+</head>
+<body>
+<h1>Tests embedding a single SVG block into a SCRIPT block</h1>
+<script type="image/svg+xml">
+  <svg xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      id="svg1">
+  </svg>
+</script>
+</body>
+</html>

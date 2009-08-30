@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Diagram using Raphael</title>
+<script type="text/javascript" src="raphael.js"></script>
+<script type="text/javascript" src="geom2d.js"></script>
+<script type="text/javascript" src="minj.js"></script>
+<script type="text/javascript" src="kozw.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+  var hinmoku_tbl = new kozw.Table({
+    name: '品目',
+    columns: ['品目C', '品目名', '製造対象', '販売対象', '購入対象'],
+    data: [
+      ['P100', '品目A', '○', '○', '×'],
+      ['P200', '品目B', '×', '×', '○'],
+      ['P300', '品目C', '○', '×', '×'],
+      ['P400', '品目D', '×', '×', '○'],
+      ['P500', '品目E', '×', '○', '○']
+    ]
+  });
+
+  var hinmoku_kousei_tbl = new kozw.Table({
+    name: '品目構成',
+    columns: ['親品目C', '子品目C', '構成比'],
+    pkeyColumnCount: 2,
+    data: [
+      ['P100', 'P200', 2.0],
+      ['P100', 'P300', 1.0],
+      ['P300', 'P400', 1.0],
+      ['P300', 'P500', 2.0]
+    ]
+  });
+
+  var paper = Raphael("canvas", 640, 480);
+  var hinmoku_elems = paper.kozw.table(20, 20, hinmoku_tbl);
+  console.log(hinmoku_elems);
+  var bbox = hinmoku_elems.getBBox(),
+      x = bbox.x + 40,
+      y = bbox.y + bbox.height + 40;
+  var hinmoku_kokusei_elems = paper.kozw.table(x, y, hinmoku_kousei_tbl);
+  /*
+  var c = paper.circle(150, 150, 100);
+  var t = paper.text(120, 80, "こんにちは、Rapahel");
+  var box = Geom2d.rect.inset(t.getBBox(), -4);
+  paper.rect(box.x, box.y, box.width, box.height);
+  console.log(box);
+  */
+};
+</script>
+<style type="text/css">
+</style>
+</head>
+<body>
+  <div id="canvas"></div>
+</body>
+</html>
+
