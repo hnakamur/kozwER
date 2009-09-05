@@ -21,7 +21,7 @@ Raphael.fn.kozw = (function() {
       columnNameFont: "10pt Arial",
       columnMargin: 4,
       columnSeparator: ',',
-      columnRowMargin: 4,
+      columnRowMargin: 8,
       dataFont: "10pt Arial",
       dataRowMargin: 2,
       connectorEndLen: 10,
@@ -66,10 +66,10 @@ log(viewConfig);
 
     var nameText = this.text(x, y, tableModel.name);
     nameText.attr({font: viewConfig.nameFont, 'text-anchor': 'start'});
-    var box = insetRect(nameText.getBBox(), -viewConfig.nameBoxPadding);
-    nameText.translate(x - box.x, y - box.y);
-    var nameRect = this.rect(x, y, box.width, box.height),
-        x1 = xj = x + box.width + viewConfig.nameMargin,
+    var nameBox = insetRect(nameText.getBBox(), -viewConfig.nameBoxPadding);
+    nameText.translate(x - nameBox.x, y - nameBox.y);
+    var nameRect = this.rect(x, y, nameBox.width, nameBox.height),
+        x1 = xj = x + nameBox.width + viewConfig.nameMargin,
         y1 = nameText.attr('y'),
         columnTexts = [],
         line,
@@ -79,6 +79,9 @@ log(viewConfig);
       var column = tableModel.columns[j];
       var text = this.text(xj, y1, column);
       text.attr({font: viewConfig.columnNameFont, 'text-anchor': 'start'});
+      if (j > 0) {
+        alignElements(columnTexts[0], 'bottom', text);
+      }
       columnTexts.push(text);
       var columnBox = text.getBBox();
 
@@ -97,7 +100,7 @@ log(viewConfig);
       }
         
       var width = columnBox.width,
-          yi = y1 + columnBox.height + viewConfig.columnRowMargin,
+          yi = y1 + nameBox.height / 2 + viewConfig.columnRowMargin,
           dataType = tableModel.getType(j);
       if (tableModel.data && tableModel.data.length > 0) {
         var dataTextsInColumn = [];
@@ -455,6 +458,31 @@ log('endConfig is not Array');
       width: rect.width - 2 * offset,
       height: rect.height - 2 * offset
     };
+  }
+
+  function alignElements(base, side, target) {
+    var baseBox = base.getBBox(),
+        box = target.getBBox(),
+        dx, dy;
+    switch (side) {
+    case 'top':
+      dx = 0;
+      dy = baseBox.y - box.y;
+      break;
+    case 'bottom':
+      dx = 0;
+      dy = (baseBox.y + baseBox.height) - (box.y + box.height);
+      break;
+    case 'left':
+      dx = baseBox.x - box.x;
+      dy = 0;
+      break;
+    case 'right':
+      dx = (baseBox.x + baseBox.height) - (box.x + box.height);
+      dy = 0;
+      break;
+    }
+    target.translate(dx, dy);
   }
 
   function def(target, src) {
