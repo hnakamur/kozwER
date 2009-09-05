@@ -7,10 +7,12 @@
 <script type="text/javascript" src="raphael.js"></script>
 <script type="text/javascript" src="geom2d.js"></script>
 <script type="text/javascript" src="minj.js"></script>
-<script type="text/javascript" src="kozw.js"></script>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="er_diagram.js"></script>
+<script type="text/javascript" src="raphael.kozw.js"></script>
 <script type="text/javascript">
 window.onload = function() {
-  var hinmoku_tbl = new kozw.Table({
+  var hinmoku_tbl = new er.Table('hinmoku_tbl', {
     name: '品目',
     columns: ['品目C', '品目名', '製造対象', '販売対象', '購入対象'],
     data: [
@@ -22,7 +24,7 @@ window.onload = function() {
     ]
   });
 
-  var hinmoku_kousei_tbl = new kozw.Table({
+  var hinmoku_kousei_tbl = new er.Table('hinmoku_kousei_tbl', {
     name: '品目構成',
     columns: ['親品目C', '子品目C', '構成比'],
     pkeyColumnCount: 2,
@@ -36,11 +38,41 @@ window.onload = function() {
 
   var paper = Raphael("canvas", 640, 480);
   var hinmoku_elems = paper.kozw.table(20, 20, hinmoku_tbl);
-  console.log(hinmoku_elems);
   var bbox = hinmoku_elems.getBBox(),
       x = bbox.x + 40,
       y = bbox.y + bbox.height + 40;
   var hinmoku_kokusei_elems = paper.kozw.table(x, y, hinmoku_kousei_tbl);
+
+  var connectors = [
+    new er.Connector(
+      hinmoku_tbl.addConnectorEnd('one', 'bottom'),
+      hinmoku_kousei_tbl.addConnectorEnd('multi', 'left', 1)
+    ),
+    new er.Connector(
+      hinmoku_tbl.addConnectorEnd('one', 'bottom'),
+      hinmoku_kousei_tbl.addConnectorEnd('multi', 'left', 0)
+    )
+  ];
+  for (var i = 0, len = connectors.length; i < len; i++) {
+    paper.kozw.connector(connectors[i]);
+  }
+
+  function drawConnectors(x, y, type) {
+    var len = 10,
+        n = 8;
+    for (var i = 0; i < n; i++) {
+      var theta = 2 * Math.PI * i / n,
+          dx = len * Math.cos(theta),
+          dy = len * Math.sin(theta);
+      paper.kozw.connectorEnd(x, y, x + dx, y + dy, type);
+      x += 2 * len;
+    }
+  }
+
+  drawConnectors(20, 240, 'one');
+  drawConnectors(20, 260, 'inherit');
+  drawConnectors(20, 280, 'multi');
+  drawConnectors(20, 300, 'ref');
   /*
   var c = paper.circle(150, 150, 100);
   var t = paper.text(120, 80, "こんにちは、Rapahel");

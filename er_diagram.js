@@ -1,16 +1,25 @@
 var er = (function($) {
   function Table(id, settings) {
     this.id = id;
-    var config = $.extend({}, Table.Defaults, settings);
+    $.extend(this, Table.Defaults, settings);
+/*
     this.name = config.name;
     this.columns = config.columns;
     this.pkeyColumnCount = config.pkeyColumnCount;
     this.data = config.data;
+*/
     this.connectorEnds = {top: [], left: [], bottom: []};
   }
   $.extend(Table, {
     Defaults: {
-      pkeyColumnCount: 1
+      pkeyColumnCount: 1,
+      nameFont: "10pt Arial",
+      namePadding: 4,
+      nameMargin: 4,
+      columnNameFont: "10pt Arial",
+      columnRowMargin: 4,
+      dataFont: "10pt Arial",
+      dataRowMargin: 2
     }
   });
   $.extend(Table.prototype, {
