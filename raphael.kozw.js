@@ -1,10 +1,13 @@
 Raphael.fn.kozw = (function() {
   function erDiagram(config) {
-    var models = buildModels(config.models);
+    var models = buildModels({
+      tables: config.tables,
+      connectors: config.connectors
+    });
 
     var viewConfig = def(def({}, erDiagram.DefaultViewConfig), config.view);
     var elements = buildElements.call(this, models, viewConfig);
-    elements.attr('stroke-width', 0.5);
+//    elements.attr('stroke-width', 0.5);
     return {
       models: models,
       elements: elements
@@ -18,7 +21,6 @@ Raphael.fn.kozw = (function() {
       columnNameFont: "10pt Arial",
       columnMargin: 4,
       columnSeparator: ',',
-      pKeyLinePaddingRight: 4,
       columnRowMargin: 4,
       dataFont: "10pt Arial",
       dataRowMargin: 2,
@@ -38,7 +40,7 @@ Raphael.fn.kozw = (function() {
         elements = [],
         y = 0;
     models.tables.forEach(function(tableModel) {
-      var offset = viewConfig.offsets[tableModel.id];
+      var offset = tableModel.offset;
       var x = offset.x || 0;
       y += offset.y || 0;
 log('calling table');
@@ -67,46 +69,71 @@ log(viewConfig);
     var box = insetRect(nameText.getBBox(), -viewConfig.nameBoxPadding);
     nameText.translate(x - box.x, y - box.y);
     var nameRect = this.rect(x, y, box.width, box.height),
-      x1 = x + box.width + viewConfig.nameMargin,
-      y1 = nameText.attr('y'),
-      columnTexts = [],
-      dataTexts = [];
-      columnCount = tableModel.columns.length;
+        x1 = xj = x + box.width + viewConfig.nameMargin,
+        y1 = nameText.attr('y'),
+        columnTexts = [],
+        line,
+        dataTexts = [];
+        columnCount = tableModel.columns.length;
     for (var j = 0; j < columnCount; j++) {
-      var column = j < columnCount - 1 ?
-          tableModel.columns[j] + viewConfig.columnSeparator :
-          tableModel.columns[j];
-      var text = columnTexts[j] = this.text(x1, y1, column);
+      var column = tableModel.columns[j];
+      var text = this.text(xj, y1, column);
       text.attr({font: viewConfig.columnNameFont, 'text-anchor': 'start'});
-      box = text.getBBox();
-      var width = box.width,
-        y2 = y1 + box.height + viewConfig.columnRowMargin;
+      columnTexts.push(text);
+      var columnBox = text.getBBox();
+
+      var sepText,
+          sepWidth;
+      if (j < columnCount - 1) {
+        sepText = this.text(columnBox.x + columnBox.width, y1,
+            viewConfig.columnSeparator);
+        sepText.attr({font: viewConfig.columnNameFont, 'text-anchor': 'start'});
+        columnTexts.push(sepText);
+        sepWidth = sepText.getBBox().width;
+      }
+      else {
+        sepText = null;
+        sepWidth = 0;
+      }
+        
+      var width = columnBox.width,
+          yi = y1 + columnBox.height + viewConfig.columnRowMargin,
+          dataType = tableModel.getType(j);
       if (tableModel.data && tableModel.data.length > 0) {
+        var dataTextsInColumn = [];
         for (var i = 0, len = tableModel.data.length; i < len; i++) {
           var row = tableModel.data[i];
           if (j < row.length) {
-            var value = row[j];
-            text = this.text(x1, y2, value);
-            text.attr({font: viewConfig.dataFont, 'text-anchor': 'start'});
+            var value = dataType == "currency" ?
+                formatCurrency(row[j]) : row[j];
+            text = this.text(xj, yi, value);
+            text.attr({
+              font: viewConfig.dataFont,
+              'text-anchor': dataType == "currency" ? 'end' : 'start'
+            });
+            dataTextsInColumn.push(text);
             dataTexts.push(text);
-            box = text.getBBox();
+            var box = text.getBBox();
             width = Math.max(box.width, width);
+            yi += box.height + viewConfig.dataRowMargin;
           }
-          y2 += box.height + viewConfig.dataRowMargin;
+        }
+        if (dataType == "currency") {
+          dataTextsInColumn.forEach(function(text) {
+            text.attr('x', xj + width);
+          });
         }
       }
 
-      x1 += width + viewConfig.columnMargin;
+      if (j == tableModel.pkeyColumnCount - 1) {
+        line = this.path([
+          ["M", x1, columnBox.y + columnBox.height],
+          ["H", xj + width]
+        ]);
+      }
+
+      xj += width + sepWidth + viewConfig.columnMargin;
     }
-    var pkeyFirstColumnText = columnTexts[0],
-      pkeyLastColumnText = columnTexts[tableModel.pkeyColumnCount - 1];
-    box = pkeyFirstColumnText.getBBox();
-    x1 = box.x;
-    y1 = box.y + box.height;
-    box = pkeyLastColumnText.getBBox();
-    x2 = box.x + box.width - viewConfig.pKeyLinePaddingRight;
-    //var line = this.path().absolutely().moveTo(x1, y1).lineTo(x2, y1);
-    var line = this.path([["M", x1, y1], ["H", x2]]);
     var elems = [nameRect, nameText].concat(columnTexts, [line], dataTexts);
     return this.set(elems);
   }
@@ -394,6 +421,10 @@ log('endConfig is not Array');
     }
   });
   def(TableModel.prototype, {
+    getType: function(columnIndex) {
+      return this.types && columnIndex < this.types.length ?
+          this.types[columnIndex] : "string";
+    },
     addConnectorEnd: function(type, side, index) {
       if (!/top|left|bottom/.test(side)) {
         throw new Error('Invalid side parameter.');
@@ -437,14 +468,26 @@ log('endConfig is not Array');
 	}
 
   function log(arg) {
-    return;
 //    console.log(arg);
   }
 
+  function formatCurrency(n) {
+    var s = '' + n,
+        buf = [],
+        j = 0;
+    for (var i = s.length - 1; i >= 0; i--) {
+      var c = s.charAt(i);
+      buf.unshift(c);
+      if (/\d/.test(c) && ++j == 3 && i - 1 >= 0 &&
+          /\d/.test(s.charAt(i - 1))) {
+        buf.unshift(",");
+        j = 0;
+      }
+    }
+    return buf.join("");
+  }
+
   return {
-    erDiagram: erDiagram,
-    table: table,
-    connector: connector,
-    connectorEnd: connectorEnd
+    erDiagram: erDiagram
   }
 })();
