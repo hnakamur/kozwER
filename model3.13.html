@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>モデル3.13 派生関係の例</title>
+<script type="text/javascript" src="raphael.js"></script>
+<script type="text/javascript" src="array.js"></script>
+<script type="text/javascript" src="raphael.kozw.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+  var paper = Raphael("canvas", 640, 480);
+  paper.kozw.erDiagram({
+    models: {
+      tables: [
+        {
+          id: "tbl_deal_base",
+          name: "取引基本テーブル",
+          columns: ["取引先C", "取引先名", "売上対象フラグ", "仕入対象フラグ", "…"],
+          data: [
+            ["T201", "第日本産業", true, false],
+            ["T202", "帝国物産", true, false],
+            ["T203", "松井電機", false, true]
+          ]
+        },
+        {
+          id: "tbl_customer_attr",
+          name: "売上先属性テーブル",
+          columns: ["取引先C", "与信限度額", "受領方法区分", "受領サイト", "…"],
+          data: [
+            ["T201", 1000000, "振込・手形", "60日"],
+            ["T202",  800000, "振込", "30日"]
+          ]
+        },
+        {
+          id: "tbl_supplier_attr",
+          name: "仕入先属性テーブル",
+          columns: ["取引先C", "支払方法区分", "支払サイト", "…"],
+          data: [
+            ["T202", "振込・手形", "30日"],
+            ["T203", "振込", "60日"]
+          ]
+        }
+      ],
+      connectors: [
+        {
+          ends: [
+            {table: "tbl_deal_base", side: "left", type: "one"},
+            [
+              {table: "tbl_customer_attr", side: "left", type: "inherit"},
+              {table: "tbl_supplier_attr", side: "left", type: "inherit"}
+            ]
+          ]
+        }
+      ]
+    },
+    view: {
+      offsets: {
+        "tbl_deal_base": {x: 40, y: 20},
+        "tbl_customer_attr": {x: 40, y: 20},
+        "tbl_supplier_attr": {x: 40, y: 20}
+      }
+    }
+  });
+
+};
+</script>
+</head>
+<body>
+  <div id="canvas"></div>
+</body>
+</html>

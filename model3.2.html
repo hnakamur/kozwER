@@ -12,44 +12,50 @@
 <script type="text/javascript" src="raphael.kozw.js"></script>
 <script type="text/javascript">
 window.onload = function() {
-  var tbl_a = new er.Table('tbl_a', {
-    name: 'テーブルA',
-    columns: ['a', 'b', 'c']
-  });
-
-  var tbl_b = new er.Table('tbl_b', {
-    name: 'テーブルB',
-    columns: ['d', 'e', 'a']
-  });
-
-  var tbl_c = new er.Table('tbl_c', {
-    name: 'テーブルC',
-    columns: ['e', 'f', 'g']
-  });
-
   var paper = Raphael("canvas", 640, 480);
-  var elems_a = paper.kozw.table(20, 20, tbl_a);
-  var bbox_a = elems_a.getBBox(),
-      x = bbox_a.x + 40,
-      y = bbox_a.y + bbox_a.height + 30;
-  var elems_b = paper.kozw.table(x, y, tbl_b);
-  var bbox_b = elems_b.getBBox();
-  y = bbox_b.y + bbox_b.height + 30;
-  var elems_c = paper.kozw.table(20, y, tbl_c);
+  paper.kozw.erDiagram({
+    models: {
+      tables: [
+        {
+          id: "tbl_a",
+          name: "テーブルA",
+          columns: ["a", "b", "c"]
+        },
+        {
+          id: "tbl_d",
+          name: "テーブルD",
+          columns: ["d", "a", "e"]
+        },
+        {
+          id: "tbl_c",
+          name: "テーブルC",
+          columns: ["e", "f", "g"]
+        }
+      ],
+      connectors: [
+        {
+          ends: [
+            {table: "tbl_a", side: "bottom", type: "one"},
+            {table: "tbl_d", side: "left", type: "ref"}
+          ]
+        },
+        {
+          ends: [
+            {table: "tbl_d", side: "left", type: "ref"},
+            {table: "tbl_c", side: "top", type: "one"}
+          ]
+        }
+      ]
+    },
+    view: {
+      offsets: {
+        "tbl_a": {x: 20, y: 20},
+        "tbl_d": {x: 60, y: 20},
+        "tbl_c": {x: 20, y: 20}
+      }
+    }
+  });
 
-  var connectors = [
-    new er.Connector(
-      tbl_a.addConnectorEnd('one', 'bottom'),
-      tbl_b.addConnectorEnd('ref', 'left')
-    ),
-    new er.Connector(
-      tbl_c.addConnectorEnd('one', 'top'),
-      tbl_b.addConnectorEnd('ref', 'left')
-    )
-  ];
-  for (var i = 0, len = connectors.length; i < len; i++) {
-    paper.kozw.connector(connectors[i]);
-  }
 };
 </script>
 <style type="text/css">
