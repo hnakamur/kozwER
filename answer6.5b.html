@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>問題6.5 回答例B</title>
+<script type="text/javascript" src="raphael.js"></script>
+<script type="text/javascript" src="array.js"></script>
+<script type="text/javascript" src="raphael.kozw.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+  var paper = Raphael("canvas", 1000, 1000);
+  paper.kozw.erDiagram({
+    tables: [
+      {
+        offset: {x: 20, y: 20},
+        id: "monthly_summary_tbl",
+        name: "月次取引サマリー",
+        columns: [
+          "年月", "月初現預金残高",
+          "月間実績\n収入合計額", "月間実績\n支出合計額", "(月末\n現預金残高)",
+          "月間収入\n予算合計額", "月間支出\n予算合計額", "…"
+        ],
+        types: [
+          "year_month", "currency",
+          "currency", "currency", "currency",
+          "currency", "currency"
+        ],
+        data: [
+          ["XX/05", 634420, 0, 12700, 621720, 300000, 80000]
+        ]
+      },
+      {
+        offset: {x: 40, y: 20},
+        id: "himoku_tbl",
+        name: "費目",
+        columns: ["費目C", "費目名", "収支区分", "…"],
+        data: [
+          ["10", "給与収入", "収入"],
+          ["11", "雑収入", "収入"],
+          ["20", "食費", "支出"],
+          ["21", "光熱費", "支出"]
+        ]
+      },
+      {
+        offset: {x: 80, y: 20},
+        id: "monthly_deal_summary_tbl",
+        name: "月次収支取引サマリー",
+        columns: ["費目C", "年月", "実績額", "予算額", "…"],
+        types: ["string", "year_month", "currency", "currency"],
+        pkeyColumnCount: 2,
+        data: [
+          ["10", "XX/05", 0, 300000],
+          ["11", "XX/05", 0, 0],
+          ["20", "XX/05", 4900, 50000],
+          ["21", "XX/05", 7800, 30000]
+        ]
+      },
+      {
+        offset: {x: 140, y: 20},
+        id: "deal_attr_tbl",
+        name: "収支取引属性",
+        columns: ["取引No", "費目C", "現預金\n口座C", "(現預金残高)", "(年月)", "…"],
+        types: ["string", "string", "string", "currency", "currency", "year_month"],
+        data: [
+          ["01234", "20", "00", 29810, "XX/05"],
+          ["01235", "20", "00", 29210, "XX/05"],
+          ["01236", "20", "00", 27410, "XX/05"],
+          ["01237", "21", "10", 294310, "XX/05"],
+        ]
+      },
+      {
+        offset: {x: 140, y: 20},
+        id: "transfer_attr_tbl",
+        name: "振替取引属性",
+        columns: ["取引No", "振替元\n口座C", "振替先\n口座C", "振替\n手数料", "(振替元残高)", "(振替先残高)", "(年月)", "…"],
+        types: ["string", "string", "string", "currency", "currency",,"currency", "year_month"],
+        data: [
+          ["01238", "10", "00", 210, 264100, 57410, "XX/05"],
+        ]
+      },
+      {
+        offset: {x: 140, y: 20},
+        id: "deal_detail_tbl",
+        name: "家計取引明細",
+        columns: ["取引No", "取引区分", "取引日", "取引額", "摘要", "…"],
+        types: ["string", "string", "date", "currency", "string"],
+        data: [
+          ["01234", "収支取引", "XX/05/02", 2500, "スーパーヤマダ"],
+          ["01235", "収支取引", "XX/05/03", 600, "コンビニKKK"],
+          ["01236", "収支取引", "XX/05/05", 1800, "スーパーヤマダ"],
+          ["01237", "収支取引", "XX/05/05", 7800, "帝国電力引落し"],
+          ["01238", "振替取引", "XX/05/06", 30000, "コンビニATM"],
+        ]
+      },
+      {
+        offset: {x: 80, y: 20},
+        id: "monthly_cash_balance_tbl",
+        name: "月次現預金残高",
+        columns: ["現預金\n口座C", "年月", "月初残高", "月間増加額", "月間減少額", "(月末残高)", "…"],
+        types: ["string", "year_month", "currency", "currency", "currency", "currency"],
+        pkeyColumnCount: 2,
+        data: [
+          ["00", "XX/05", 32310, 30000, 4900, 57410],
+          ["10", "XX/05", 302110, 0, 37800, 264310],
+          ["11", "XX/05", 300000, 0, 0, 300000]
+        ]
+      },
+      {
+        offset: {x: 40, y: 20},
+        id: "cache_tbl",
+        name: "現預金",
+        columns: ["現預金口座C", "現預金名", "現預金区分", "…"],
+        data: [
+          ["00", "手持ち現金", "現金"],
+          ["10", "パセリ銀行普通口座", "預金"],
+          ["11", "セロリ銀行定期預金", "預金"]
+        ]
+      }
+    ],
+    connectors: [
+      {
+        ends: [
+          {table: "himoku_tbl", side: "bottom", type: "one"},
+          {table: "monthly_deal_summary_tbl", side: "left", type: "multi"}
+        ]
+      },
+      {
+        ends: [
+          {table: "monthly_summary_tbl", side: "bottom", type: "one"},
+          {table: "monthly_cash_balance_tbl", side: "left", type: "multi"}
+        ]
+      },
+      {
+        ends: [
+          {table: "monthly_summary_tbl", side: "bottom", type: "one"},
+          {table: "monthly_deal_summary_tbl", side: "left", type: "multi"}
+        ]
+      },
+      {
+        ends: [
+          {table: "monthly_deal_summary_tbl", side: "bottom", type: "one"},
+          {table: "deal_attr_tbl", side: "left", type: "ref"}
+        ]
+      },
+      {
+        ends: [
+          {table: "deal_attr_tbl", side: "left", type: "ref"},
+          {table: "monthly_cash_balance_tbl", side: "top", type: "one"}
+        ]
+      },
+      {
+        ends: [
+          {table: "deal_detail_tbl", side: "left", type: "one"},
+          [
+            {table: "deal_attr_tbl", side: "left", type: "inherit"},
+            {table: "transfer_attr_tbl", side: "left", type: "inherit"}
+          ]
+        ]
+      },
+      {
+        ends: [
+          {table: "transfer_attr_tbl", side: "left", type: "ref"},
+          {table: "monthly_cash_balance_tbl", side: "top", type: "one"}
+        ]
+      },
+      {
+        ends: [
+          {table: "transfer_attr_tbl", side: "left", type: "ref"},
+          {table: "monthly_cash_balance_tbl", side: "top", type: "one"}
+        ]
+      },
+      {
+        ends: [
+          {table: "monthly_cash_balance_tbl", side: "left", type: "multi"},
+          {table: "cache_tbl", side: "top", type: "one"}
+        ]
+      }
+    ]
+  });
+};
+</script>
+</head>
+<body>
+  <div id="canvas"></div>
+</body>
+</html>
+

@@ -30,7 +30,7 @@ Raphael.fn.kozw = (function() {
       connectorEndFirstOffset: 8,
       oneConnectorEndPosRatio: 0.4,
       inheritConnectorEndRadiusRatio: 0.3,
-      inheritConnectorOffsetX: 30
+      inheritConnectorOffsetX: 20
     }
   });
 
@@ -79,9 +79,7 @@ log(viewConfig);
       var column = tableModel.columns[j];
       var text = this.text(xj, y1, column);
       text.attr({font: viewConfig.columnNameFont, 'text-anchor': 'start'});
-      if (j > 0) {
-        alignElements(columnTexts[0], 'bottom', text);
-      }
+      alignElements(nameText, 'bottom', text);
       columnTexts.push(text);
       var columnBox = text.getBBox();
 
