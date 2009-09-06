@@ -104,7 +104,7 @@ log(viewConfig);
         var dataTextsInColumn = [];
         for (var i = 0, len = tableModel.data.length; i < len; i++) {
           var row = tableModel.data[i];
-          if (j < row.length) {
+          if (row && j < row.length) {
             var value = dataType == "currency" ?
                 formatCurrency(row[j]) : row[j];
             text = this.text(xj, yi, value);
@@ -490,7 +490,8 @@ log('endConfig is not Array');
   }
 
 	function isArray(obj) {
-		return (obj instanceof Array) || (toString.call(obj) === "[object Array]");
+		return (obj instanceof Array) ||
+        Object.prototype.toString.call(obj) === "[object Array]";
 	}
 
   function log(arg) {
@@ -513,7 +514,29 @@ log('endConfig is not Array');
     return buf.join("");
   }
 
+  function ellipseStar(x, y, rx, ry, rOffset, n) {
+    var pathElems = [];
+    pathElems.push(["M", x + rx, y]);
+    for (var i = 1; i < 2 * n; i++) {
+      var theta = 2 * Math.PI * i / (2 * n);
+      var rxi, ryi;
+      if (i % 2 == 0) {
+        rxi = rx;
+        ryi = ry;
+      }
+      else {
+        rxi = rx - rOffset;
+        ryi = ry - rOffset;
+      }
+      pathElems.push(
+        ["L", x + rxi * Math.cos(theta), y + ryi * Math.sin(theta)]);
+    }
+    pathElems.push("Z");
+    return his.path(pathElems);
+  }
+
   return {
-    erDiagram: erDiagram
+    erDiagram: erDiagram,
+    ellipseStar: ellipseStar
   }
 })();
