@@ -127,7 +127,7 @@ var er = (function($) {
           break;
         }
         break;
-      case 'multi':
+      case 'many':
         var r = w / 2;
         switch (this.side) {
         case 'left':

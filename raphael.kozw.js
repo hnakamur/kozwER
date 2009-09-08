@@ -292,7 +292,7 @@ log(line);
     if (type == 'ref') {
       line.attr({"stroke-dasharray": ". "});
     }
-    else if (type == 'multi') {
+    else if (type == 'many') {
       var dx = xe - x1,
           dy = ye - y1,
           len = Math.sqrt(dx * dx + dy * dy),
