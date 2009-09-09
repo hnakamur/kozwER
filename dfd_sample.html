@@ -1,0 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Data Flow Diagram Sample</title>
+<script type="text/javascript" src="raphael.js"></script>
+<script type="text/javascript" src="array.js"></script>
+<script type="text/javascript" src="raphael.kozw.js"></script>
+<script type="text/javascript" src="raphael.ellipseStar.js"></script>
+<script type="text/javascript" src="raphael.notebook.js"></script>
+<script type="text/javascript" src="raphael.primitives.js"></script>
+<link rel="stylesheet" type="text/css" href="kozw.css">
+<script type="text/javascript">
+window.onload = function() {
+  var paper = Raphael("canvas", 1000, 1000);
+  paper.ellipse(250, 150, 60, 40);
+  paper.text(250, 150, "(受注担当者)\n受注受付");
+  paper.ellipseStar(200, 105, 50, 30, 10, 12).attr({fill: '#fff'});
+  paper.text(200, 105, "注文が来た!");
+  var elem = paper.notebook(430, 50, 60, 80, 5);
+  paper.text(430, 50, "受注台帳");
+
+  function drawCurveArrow(sx, sy, cx, cy, ex, ey, ah, arrowAngle) {
+    var aRad = Math.PI * arrowAngle / 180;
+    var edgeLen = ah / Math.cos(aRad / 2);
+    var endAngle = Math.atan2(cy - ey, cx - ex);
+    var elem = paper.path([
+      ["M", sx, sy],
+      ["Q", cx, cy, ex, ey]
+    ]);
+    var head = paper.path([
+      ["M", ex, ey],
+      ["L", ex + edgeLen * Math.cos(endAngle + aRad / 2),
+            ey + edgeLen * Math.sin(endAngle + aRad / 2)],
+      ["L", ex + edgeLen * Math.cos(endAngle - aRad / 2),
+            ey + edgeLen * Math.sin(endAngle - aRad / 2)],
+      ["Z"]
+    ]).attr({fill: "#000"});
+    return paper.set([elem, head]);
+  }
+
+//  drawCurveArrow(250, 100, 300, 50, 380, 50, 10, 45);
+
+  function drawCubicCurveArrow(sx, sy, c1x, c1y, c2x, c2y, ex, ey, ah, arrowAngle) {
+    var aRad = Math.PI * arrowAngle / 180;
+    var edgeLen = ah / Math.cos(aRad / 2);
+    var endAngle = Math.atan2(c2y - ey, c2x - ex);
+    var elem = paper.path([
+      ["M", sx, sy],
+      ["C", c1x, c1y, c2x, c2y, ex, ey]
+    ]);
+    var head = paper.path([
+      ["M", ex, ey],
+      ["L", ex + edgeLen * Math.cos(endAngle + aRad / 2),
+            ey + edgeLen * Math.sin(endAngle + aRad / 2)],
+      ["L", ex + edgeLen * Math.cos(endAngle - aRad / 2),
+            ey + edgeLen * Math.sin(endAngle - aRad / 2)],
+      ["Z"]
+    ]).attr({fill: "#000"});
+    return paper.set([elem, head]);
+  }
+  drawCubicCurveArrow(250, 100, 270, 60, 320, 50, 380, 50, 10, 45);
+
+/*
+  paper.kozw.dfdDiagram({
+    tasks: [
+      {
+        id: "receive_order_task",
+        name: "受注受付",
+        job_role: "受注担当者",
+        occurrence_condition: "注文を受けた!"
+      }
+    ],
+    storages: [
+      {
+        id: "order_ledger",
+        name: "受注簿"
+      }
+    ],
+    flows: [
+      {
+        source_id: "receive_order_task",
+        destination_id: "order_ledger",
+        bidirectional: true
+      }
+    ]
+  });
+*/
+};
+</script>
+</head>
+<body>
+  <h1>Data Flow Diagram Sample</h1>
+  <div id="canvas"></div>
+</body>
+</html>
+

@@ -1,6 +1,6 @@
 Raphael.fn.ellipseStar = function(x, y, rx, ry, rOffset, n) {
   var pathElems = [];
-  pathElems.push(["M", x + rx, y]);
+  pathElems.push(["M", (x + rx).toFixed(3), y.toFixed(3)]);
   for (var i = 1; i < 2 * n; i++) {
     var theta = 2 * Math.PI * i / (2 * n);
     var rxi, ryi;
@@ -12,8 +12,10 @@ Raphael.fn.ellipseStar = function(x, y, rx, ry, rOffset, n) {
       rxi = rx - rOffset;
       ryi = ry - rOffset;
     }
-    pathElems.push(
-      ["L", x + rxi * Math.cos(theta), y + ryi * Math.sin(theta)]);
+    pathElems.push(["L",
+      (x + rxi * Math.cos(theta)).toFixed(3),
+      (y + ryi * Math.sin(theta)).toFixed(3)
+    ]);
   }
   pathElems.push("Z");
   return this.path(pathElems);

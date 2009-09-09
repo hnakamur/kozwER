@@ -56,7 +56,10 @@ Raphael.fn.notebook = (function() {
       xi -= r * tanSlant
       yi += r;
     }
-    return paper.path(pathElems);
+    var elem = paper.path(pathElems);
+//    var box = elem.getBBox();
+    elem.translate(-width / 2, -height / 2);
+    return elem;
   };
 
   function extend(dest, src) {
