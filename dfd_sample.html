@@ -5,75 +5,54 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <title>Data Flow Diagram Sample</title>
 <script type="text/javascript" src="raphael.js"></script>
-<script type="text/javascript" src="array.js"></script>
 <script type="text/javascript" src="raphael.kozwER.js"></script>
-<script type="text/javascript" src="raphael.kozw.js"></script>
-<script type="text/javascript" src="raphael.ellipseStar.js"></script>
-<script type="text/javascript" src="raphael.notebook.js"></script>
-<script type="text/javascript" src="raphael.primitives.js"></script>
 <link rel="stylesheet" type="text/css" href="kozw.css">
-<script type="text/javascript">
+<script>
 window.onload = function() {
   var paper = Raphael("canvas", 1000, 1000);
-/*
-  paper.ellipse(250, 150, 60, 40);
-  paper.text(250, 150, "(受注担当者)\n受注受付");
-  paper.ellipseStar(200, 105, 50, 30, 10, 12).attr({fill: '#fff'});
-  paper.text(200, 105, "注文が来た!");
-  var elem = paper.notebook(430, 50, 60, 80, 5);
-  paper.text(430, 50, "受注台帳");
 
-  function drawCurveArrow(sx, sy, cx, cy, ex, ey, ah, arrowAngle) {
-    var aRad = Math.PI * arrowAngle / 180;
-    var edgeLen = ah / Math.cos(aRad / 2);
-    var endAngle = Math.atan2(cy - ey, cx - ex);
-    var elem = paper.path([
-      ["M", sx, sy],
-      ["Q", cx, cy, ex, ey]
-    ]);
-    var head = paper.path([
-      ["M", ex, ey],
-      ["L", ex + edgeLen * Math.cos(endAngle + aRad / 2),
-            ey + edgeLen * Math.sin(endAngle + aRad / 2)],
-      ["L", ex + edgeLen * Math.cos(endAngle - aRad / 2),
-            ey + edgeLen * Math.sin(endAngle - aRad / 2)],
-      ["Z"]
-    ]).attr({fill: "#000"});
-    return paper.set([elem, head]);
-  }
+  var taskUnitDefaults = paper.kozwER.defaults("taskUnit");
+  var unitRx = taskUnitDefaults.rx;
+  var unitRy = taskUnitDefaults.ry;
 
-//  drawCurveArrow(250, 100, 300, 50, 380, 50, 10, 45);
+  var trigRx = 30;
+  var trigRy = 21;
+  var taskTriggerDefaults = {rx: trigRx, ry: trigRy};
+  paper.kozwER.defaults({taskTrigger: taskTriggerDefaults});
 
-  function drawCubicCurveArrow(sx, sy, c1x, c1y, c2x, c2y, ex, ey, ah, arrowAngle) {
-    var aRad = Math.PI * arrowAngle / 180;
-    var edgeLen = ah / Math.cos(aRad / 2);
-    var endAngle = Math.atan2(c2y - ey, c2x - ex);
-    var elem = paper.path([
-      ["M", sx, sy],
-      ["C", c1x, c1y, c2x, c2y, ex, ey]
-    ]);
-    var head = paper.path([
-      ["M", ex, ey],
-      ["L", ex + edgeLen * Math.cos(endAngle + aRad / 2),
-            ey + edgeLen * Math.sin(endAngle + aRad / 2)],
-      ["L", ex + edgeLen * Math.cos(endAngle - aRad / 2),
-            ey + edgeLen * Math.sin(endAngle - aRad / 2)],
-      ["Z"]
-    ]).attr({fill: "#000"});
-    return paper.set([elem, head]);
-  }
-  drawCubicCurveArrow(250, 100, 270, 60, 320, 50, 380, 50, 10, 45);
-*/
+  var x = 100;
+  var y = 145;
+  paper.kozwER.taskUnit(x, y, "収支取引\nの登録");
+  paper.kozwER.taskTrigger(x - unitRx, y - unitRy, "週次");
 
-  function roundFloat(x, digits) {
-    var shift = Math.pow(10, digits);
-    return Math.round(x * shift) / shift;
-  }
+  paper.kozwER.notebook(260, 70, "取引\n集計簿");
 
-  paper.kozwER.arrow(40, 40, 30);
-  paper.kozwER.curve([20, 20, 40, 120, 80, 100, 160, 180],
-      {command: "C", arrow: {start:true, end:true}});
+  paper.kozwER.notebook(260, 220, "収支\n取引簿");
 
+  x = 450;
+  y = 145;
+  paper.kozwER.taskUnit(x, y, "費目別予算\nの登録");
+  paper.kozwER.taskTrigger(x - unitRx, y - unitRy, "随時");
+
+  paper.kozwER.curve(
+    [100, 145 - (unitRy + 10), 120, 70, 260 - unitRx, 70],
+    {arrow: {end: true}}
+  );
+  paper.text(150, 60, "費目別実績");
+
+  paper.kozwER.curve(
+    [100, 145 + (unitRy + 10), 120, 220, 260 - unitRx, 220],
+    {arrow: {end: true}}
+  );
+  paper.text(150, 230, "収支取引");
+
+  paper.kozwER.curve(
+    [450, 145 - (unitRy + 10), 430, 70, 260 + unitRx, 70],
+    {arrow: {end: true}}
+  );
+  paper.text(380, 60, "費目別予算");
+
+// paper.attr({"class": "hoge", "font-family": "Helvetica", "font-size": 14});
 /*
   paper.kozw.dfdDiagram({
     tasks: [
