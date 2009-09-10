@@ -1,8 +1,12 @@
 Raphael.fn.kozwER = (function() {
-  var FixedDigits = 2;
+  var global = {
+    Defaults: {
+      fixedDigits: 3
+    }
+  };
 
   function curve(xy, options) {
-    var config = extend({}, curve.defaults, options);
+    var config = extend({}, curve.Defaults, options);
     if (config.command != "C" && config.command != "Q") {
       throw new Error("Unsupported command");
     }
@@ -29,12 +33,12 @@ Raphael.fn.kozwER = (function() {
 
     return elems.length > 1 ? this.set(elems) : elem;
   }
-  curve.defaults = {
+  curve.Defaults = {
     command: "Q"
   }
 
   function arrow(ex, ey, angle, options) {
-    var config = extend({}, arrow.defaults, options);
+    var config = extend({}, arrow.Defaults, options);
     var arrowAngleHalf = deg2rad(config.arrowAngle / 2);
     var theta0 = deg2rad(angle + 180);
     var theta1 = theta0 + arrowAngleHalf;
@@ -51,11 +55,38 @@ Raphael.fn.kozwER = (function() {
     }
     return path;
   }
-  arrow.defaults = {
+  arrow.Defaults = {
     fill: "#000",
     arrowAngle: 45,
     arrowLength: 10
   };
+
+  var Defaults = {
+    arrow: arrow.Defaults,
+    curve: curve.Defaults,
+    global: global.Defaults
+  }
+
+  function defaults() {
+    switch (arguments.length) {
+    case 0:
+      return Defaults;
+    case 1:
+      var arg = arguments[0];
+      if (isString(arg)) {
+        return Defaults[arg];
+      }
+      else {
+        for (var k in arg) {
+          extend(Defaults[k], arg[k]);
+        }
+        return Defaults;
+      }
+      break;
+    default:
+      throw new Error("Illegal Argument for defaults");
+    }
+  }
 
   function myPath(commands) {
     return this.path(fixPathCommands(commands));
@@ -64,7 +95,8 @@ Raphael.fn.kozwER = (function() {
   function fixPathCommands(commands) {
     return commands.map(function(command) {
       return command.map(function(elem) {
-        return isNaN(elem) ? elem : roundFloat(elem, FixedDigits);
+        return isNaN(elem) ? elem :
+            roundFloat(elem, global.Defaults.fixedDigits);
       });
     });
   }
@@ -92,7 +124,12 @@ Raphael.fn.kozwER = (function() {
     return dest;
   }
 
+  function isString(obj) {
+    return typeof obj == "string";
+  }
+
   return {
+    defaults: defaults,
     arrow: arrow,
     curve: curve
   };
