@@ -1,12 +1,20 @@
 Raphael.fn.kozwER = (function() {
-  var global = {
-    Defaults: {
+  var Defaults = {
+    arrow: {
+      fill: "#000",
+      arrowAngle: 45,
+      arrowLength: 10
+    },
+    curve: {
+      command: "Q"
+    },
+    global: {
       fixedDigits: 3
     }
-  };
+  }
 
   function curve(xy, options) {
-    var config = extend({}, curve.Defaults, options);
+    var config = extend({}, Defaults.curve, options);
     if (config.command != "C" && config.command != "Q") {
       throw new Error("Unsupported command");
     }
@@ -33,12 +41,9 @@ Raphael.fn.kozwER = (function() {
 
     return elems.length > 1 ? this.set(elems) : elem;
   }
-  curve.Defaults = {
-    command: "Q"
-  }
 
   function arrow(ex, ey, angle, options) {
-    var config = extend({}, arrow.Defaults, options);
+    var config = extend({}, Defaults.arrow, options);
     var arrowAngleHalf = deg2rad(config.arrowAngle / 2);
     var theta0 = deg2rad(angle + 180);
     var theta1 = theta0 + arrowAngleHalf;
@@ -54,17 +59,6 @@ Raphael.fn.kozwER = (function() {
       path.attr("fill", config.fill);
     }
     return path;
-  }
-  arrow.Defaults = {
-    fill: "#000",
-    arrowAngle: 45,
-    arrowLength: 10
-  };
-
-  var Defaults = {
-    arrow: arrow.Defaults,
-    curve: curve.Defaults,
-    global: global.Defaults
   }
 
   function defaults() {
@@ -96,7 +90,7 @@ Raphael.fn.kozwER = (function() {
     return commands.map(function(command) {
       return command.map(function(elem) {
         return isNaN(elem) ? elem :
-            roundFloat(elem, global.Defaults.fixedDigits);
+            roundFloat(elem, Defaults.global.fixedDigits);
       });
     });
   }
