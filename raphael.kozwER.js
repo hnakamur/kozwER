@@ -85,7 +85,7 @@ Raphael.fn.kozwER = (function() {
     }
     elems.push(_path.call(this, pathElems));
     elems.push(this.text(x, y, text));
-    return this.set([elems]);
+    return this.set(elems);
   }
 
   function curve(xy, options) {
@@ -118,6 +118,21 @@ Raphael.fn.kozwER = (function() {
   }
 
   function arrow(x, y, angle, options) {
+    var config = extend({}, Defaults.arrow, options);
+    var w = config.arrowLength;
+    var h = w * Math.tan(deg2rad(config.arrowAngle / 2));
+    var path = _path.call(this, [
+      ["M", x, y],
+      ["l", -w, h, -w, -h],
+      ["z"]
+    ]).rotate(angle, x, y);
+    if (config.fill) {
+      path.attr("fill", config.fill);
+    }
+    return path;
+  }
+
+  function arrow_old(x, y, angle, options) {
     var config = extend({}, Defaults.arrow, options);
     var w = config.arrowLength;
     var h = w * Math.tan(deg2rad(config.arrowAngle / 2));

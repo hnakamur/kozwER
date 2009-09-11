@@ -4,12 +4,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <title>Data Flow Diagram Sample</title>
-<script type="text/javascript" src="raphael.js"></script>
+<script type="text/javascript" src="lib/raphael.js"></script>
 <script type="text/javascript" src="raphael.kozwER.js"></script>
 <link rel="stylesheet" type="text/css" href="kozw.css">
 <script>
 window.onload = function() {
-  var paper = Raphael("canvas", 1000, 1000);
+  var paper = Raphael("canvas", 640, 400);
 
   var taskUnitDefaults = paper.kozwER.defaults("taskUnit");
   var unitRx = taskUnitDefaults.rx;
@@ -18,39 +18,47 @@ window.onload = function() {
   var trigRx = 30;
   var trigRy = 21;
   var taskTriggerDefaults = {rx: trigRx, ry: trigRy};
-  paper.kozwER.defaults({taskTrigger: taskTriggerDefaults});
+
+  var elems = [];
+  elems.push(paper.kozwER.defaults({taskTrigger: taskTriggerDefaults}));
 
   var x = 100;
   var y = 145;
-  paper.kozwER.taskUnit(x, y, "収支取引\nの登録");
-  paper.kozwER.taskTrigger(x - unitRx, y - unitRy, "週次");
+  elems.push(paper.kozwER.taskUnit(x, y, "収支取引\nの登録"));
+  elems.push(paper.kozwER.taskTrigger(x - unitRx, y - unitRy, "週次"));
 
-  paper.kozwER.notebook(260, 70, "取引\n集計簿");
+  elems.push(paper.kozwER.notebook(260, 70, "取引\n集計簿"));
 
-  paper.kozwER.notebook(260, 220, "収支\n取引簿");
+  elems.push(paper.kozwER.notebook(260, 220, "収支\n取引簿"));
 
   x = 450;
   y = 145;
-  paper.kozwER.taskUnit(x, y, "費目別予算\nの登録");
-  paper.kozwER.taskTrigger(x - unitRx, y - unitRy, "随時");
+  elems.push(paper.kozwER.taskUnit(x, y, "費目別予算\nの登録"));
+  elems.push(paper.kozwER.taskTrigger(x - unitRx, y - unitRy, "随時"));
 
-  paper.kozwER.curve(
+  elems.push(paper.kozwER.curve(
     [100, 145 - (unitRy + 10), 120, 70, 260 - unitRx, 70],
     {arrow: {end: true}}
-  );
-  paper.text(150, 60, "費目別実績");
+  ));
+  elems.push(paper.text(150, 60, "費目別実績"));
 
-  paper.kozwER.curve(
+  elems.push(paper.kozwER.curve(
     [100, 145 + (unitRy + 10), 120, 220, 260 - unitRx, 220],
     {arrow: {end: true}}
-  );
-  paper.text(150, 230, "収支取引");
+  ));
+  elems.push(paper.text(150, 230, "収支取引"));
 
-  paper.kozwER.curve(
-    [450, 145 - (unitRy + 10), 430, 70, 260 + unitRx, 70],
-    {arrow: {end: true}}
-  );
-  paper.text(380, 60, "費目別予算");
+//  elems.push(paper.kozwER.curve(
+//    [450, 145 - (unitRy + 10), 430, 70, 260 + unitRx, 70],
+//    {arrow: {end: true}}
+//  ));
+  elems.push(paper.text(380, 60, "費目別予算"));
+  elems.push(paper.kozwER.curve(
+    [260 + unitRx, 70, 430, 70, 450, 145 - (unitRy + 10)],
+    {arrow: {start: true}}
+  ));
+
+  var elemSet = paper.set(elems).translate(100, 0);
 
 // paper.attr({"class": "hoge", "font-family": "Helvetica", "font-size": 14});
 /*

@@ -17,25 +17,26 @@ var vegu = (function() {
     return elem;
   }
 
-  function setAttrs(elem, attrs) {
-    for (var k in attrs)
-      elem.setAttribute(k, attrs[k]);
+  function setAttr(elem, attributes) {
+    for (var k in attributes)
+      elem.setAttribute(k, attributes[k]);
+    return elem;
   }
 
-  function getAttrs(names) {
-    var attrs = {};
+  function attr(elem, names) {
+    var ret = {};
     for (var i = 0, len = names.length; i < len; i++) {
       var name = names[i];
-      attrs[name] = elem.getAttribute(name);
+      ret[name] = elem.getAttribute(name);
     }
-    return attrs;
+    return ret;
   }
 
   return {
     createFragment: createFragment,
     createElement: createElement,
     createText: createText,
-    setAttrs: setAttrs,
-    getAttrs: getAttrs
+    setAttr: setAttr,
+    attr: attr
   };
 })();

@@ -4,56 +4,46 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <title>Diagram using Raphael</title>
-<script type="text/javascript" src="raphael.js"></script>
-<script type="text/javascript" src="geom2d.js"></script>
-<script type="text/javascript" src="minj.js"></script>
-<script type="text/javascript" src="jquery.js"></script>
-<script type="text/javascript" src="er_diagram.js"></script>
+<script type="text/javascript" src="lib/raphael.js"></script>
 <script type="text/javascript" src="raphael.kozw.js"></script>
 <script type="text/javascript">
 window.onload = function() {
   var paper = Raphael("canvas", 640, 480);
   paper.kozw.erDiagram({
-    models: {
-      tables: [
-        {
-          id: "tbl_a",
-          name: "テーブルA",
-          columns: ["a", "b", "c"]
-        },
-        {
-          id: "tbl_d",
-          name: "テーブルD",
-          columns: ["d", "a", "e"]
-        },
-        {
-          id: "tbl_c",
-          name: "テーブルC",
-          columns: ["e", "f", "g"]
-        }
-      ],
-      connectors: [
-        {
-          ends: [
-            {table: "tbl_a", side: "bottom", type: "one"},
-            {table: "tbl_d", side: "left", type: "ref"}
-          ]
-        },
-        {
-          ends: [
-            {table: "tbl_d", side: "left", type: "ref"},
-            {table: "tbl_c", side: "top", type: "one"}
-          ]
-        }
-      ]
-    },
-    view: {
-      offsets: {
-        "tbl_a": {x: 20, y: 20},
-        "tbl_d": {x: 60, y: 20},
-        "tbl_c": {x: 20, y: 20}
+    tables: [
+      {
+        offset: {x: 20, y: 20},
+        id: "tbl_a",
+        name: "テーブルA",
+        columns: ["a", "b", "c"]
+      },
+      {
+        offset: {x: 60, y: 20},
+        id: "tbl_d",
+        name: "テーブルD",
+        columns: ["d", "a", "e"]
+      },
+      {
+        offset: {x: 20, y: 20},
+        id: "tbl_c",
+        name: "テーブルC",
+        columns: ["e", "f", "g"]
       }
-    }
+    ],
+    connectors: [
+      {
+        ends: [
+          {table: "tbl_a", side: "bottom", type: "one"},
+          {table: "tbl_d", side: "left", type: "ref"}
+        ]
+      },
+      {
+        ends: [
+          {table: "tbl_d", side: "left", type: "ref"},
+          {table: "tbl_c", side: "top", type: "one"}
+        ]
+      }
+    ]
   });
 
 };
