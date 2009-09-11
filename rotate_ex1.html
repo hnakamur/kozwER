@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>Translate a set containing a rotated element sample</title>
+<script type="text/javascript" src="lib/raphael.js"></script>
+<script>
+window.onload = function() {
+  Raphael.fn.arrowHead = function (x, y, angle) {
+    var arrowAngle = 45;
+    var arrowR = 20;
+    var rad = Math.PI / 180 * arrowAngle / 2;
+    var w = arrowR * Math.cos(rad);
+    var h = arrowR * Math.sin(rad);
+    return this.path("M".concat([x, y], "l", [-w, h / 2, 0, -h], "z")).rotate(angle | 0, x, y);
+  }
+
+  Raphael.fn.lineWithArrows = function (x1, y1, x2, y2) {
+    var angle = 180 / Math.PI * Math.atan2(y2 - y1, x2 - x1);
+    var elems = [];
+    elems.push(this.path("M".concat([x1, y1], "L", [x2, y2])));
+    elems.push(this.arrowHead(x1, y1, angle + 180));
+    elems.push(this.arrowHead(x2, y2, angle));
+    return this.set(elems);
+  }
+
+  var paper = Raphael("canvas", 640, 400);
+
+  paper.lineWithArrows(100, 100, 200, 100);
+  paper.lineWithArrows(0, 120, 100, 120).translate(100, 0);
+//  paper.lineWithArrows(100, 140, 200, 180);
+//  paper.lineWithArrows(0, 160, 100, 200).translate(100, 0);
+};
+</script>
+</head>
+<body>
+  <h1>Translate a set containing a rotated element sample</h1>
+  <div id="canvas"></div>
+</body>
+</html>
+

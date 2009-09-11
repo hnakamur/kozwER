@@ -1,0 +1,44 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="css/jquery.svg.css">
+<style type="text/css">
+#canvas1 { width: 400px; height: 300px; border: 1px solid #484; }
+
+.myCircle {
+  fill: none;
+  stroke: blue;
+}
+</style>
+<script type="text/javascript" src="lib/jquery.js"></script>
+<script type="text/javascript" src="lib/jquery.svg.js"></script>
+<script>
+
+$(function() {
+  $('#canvas1').svg(drawInit);
+});
+
+function drawInit(svg) {
+  var c1 = svg.circle(130, 75, 50, {class_: 'myCircle'});
+  var c2 = svg.circle(130, 175, 50, {fill: 'none', stroke: '#000', strokeWidth: 1});
+  var g = svg.group();
+  var texts = svg.createText(); 
+  svg.text(g, 100, 200, texts.span("Hello,").span("jQuery.svg", {dx: -50, dy: 20}));
+
+  svg.path(null, svg.createPath().move(50, 90).line(150, 30).
+      curveQ(250, 40, 360, 120),
+      {fill: 'none', stroke: '#f00', id: 'path1'});
+
+  svg.textpath(svg._makeNode(null, 'text'), '#path1',
+    svg.createText().string('We go ').
+    span('up', {dy: -30, fill: 'red'}).span(',', {dy: 30}). 
+    string(' then we go down, then up again'),
+    {stroke: 'blue', strokeWidth: 1});
+}
+
+</script>
+</head>
+<body>
+<h1>jQuery SVG example</h1>
+<div id="canvas1"></div>
+</body>
+</html>
