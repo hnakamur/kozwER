@@ -9,12 +9,10 @@ window.onload = function() {
   var s = svgdom.Element.byId('svg1');
 
   var g = s.g();
-  s.append(g);
 
-  var rect = s.rect({stroke: '#000', fill: 'none'});
-  g.append(rect);
-  var text1 = s.text({x: 40, y: 24}).append(s.textNode("受注"));
-  g.append(text1);
+  var rect = g.rect({stroke: '#000', fill: 'none'});
+  var text1 = g.text({x: 40, y: 24});
+  text1.textNode("受注");
 
   var box = text1.getTextBBox();
   rect.setAttr(svgdom.geom.insetRect(box, -4));
