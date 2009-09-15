@@ -6,19 +6,18 @@
 <script src="svgdom.kozwER.js"></script>
 <script>
 window.onload = function() {
-  var M = svgdom;
-  var svg1 = M.byId('svg1');
-  var g = M.g();
-  var rect = M.rect();
-  var text1 = M.text({x: 40, y: 24}).append(M.textNode("受注"));
+  var s = svgdom.Element.byId('svg1');
+
+  var g = s.g();
+  s.append(g);
+
+  var rect = s.rect({stroke: '#000', fill: 'none'});
   g.append(rect);
+  var text1 = s.text({x: 40, y: 24}).append(s.textNode("受注"));
   g.append(text1);
 
-  svg1.append(g);
   var box = text1.getTextBBox();
-  rect.setAttr(M.geom.insetRect(box, -4)).setAttr({stroke: '#000', fill: 'none'});
-//  var rect = M.rect(M.geom.insetRect(box, -4)).setAttr({stroke: '#000', fill: 'none'});
-//  svg1.append(rect);
+  rect.setAttr(svgdom.geom.insetRect(box, -4));
 }
 </script>
 </head>

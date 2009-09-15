@@ -6,21 +6,20 @@
 <script src="svgdom.kozwER.js"></script>
 <script>
 window.onload = function() {
-  var M = svgdom;
-
-  M.byId('svg1').append(
-    M.relationEnd(40, 40, 0, 'one'),
-    M.relationEnd(40, 60, 0, 'many'),
-    M.relationEnd(40, 80, 0, 'ref'),
-    M.relationEnd(40, 100, 0, 'inherit'),
-    M.relationEnd(60, 40, 90, 'one'),
-    M.relationEnd(60, 60, 90, 'many'),
-    M.relationEnd(60, 80, 90, 'ref'),
-    M.relationEnd(60, 100, 90, 'inherit'),
-    M.relationEnd(80, 40, 270, 'one'),
-    M.relationEnd(80, 60, 270, 'many'),
-    M.relationEnd(80, 80, 270, 'ref'),
-    M.relationEnd(80, 100, 270, 'inherit')
+  var s = svgdom.Element.byId('svg1');
+  s.append(
+    s.relationEnd(40, 40, 0, 'one'),
+    s.relationEnd(40, 60, 0, 'many'),
+    s.relationEnd(40, 80, 0, 'ref'),
+    s.relationEnd(40, 100, 0, 'inherit'),
+    s.relationEnd(60, 40, 90, 'one'),
+    s.relationEnd(60, 60, 90, 'many'),
+    s.relationEnd(60, 80, 90, 'ref'),
+    s.relationEnd(60, 100, 90, 'inherit'),
+    s.relationEnd(80, 40, 270, 'one'),
+    s.relationEnd(80, 60, 270, 'many'),
+    s.relationEnd(80, 80, 270, 'ref'),
+    s.relationEnd(80, 100, 270, 'inherit')
   );
 }
 </script>
