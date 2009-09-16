@@ -14,7 +14,7 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
     var p1, p2;
 
     function endStartPoint(x, y, angle, length) {
-      var rad = M.geom.deg2rad(angle);
+      var rad = deg2rad(angle);
       return {
         x: x - length * Math.cos(rad),
         y: y - length * Math.sin(rad)
@@ -46,35 +46,39 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
     switch (cardinality) {
     case 'one':
       var x2 = h * config.oneConnectorEndPosRatio;
-      elem = this.path({
-        'class': 'relationEnd one',
-        stroke: '#000',
-        fill: 'none',
-        d: this.formatPath([
+      elem = this.path(
+        [
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', -x2, -w / 2],
           ['L', -x2, w / 2]
-        ]),
-        transform: transform
-      });
+        ],
+        {
+          'class': 'relationEnd one',
+          stroke: '#000',
+          fill: 'none',
+          transform: transform
+        }
+      );
       break;
     case 'many':
       var r = w / 2;
-      elem = this.path({
-        'class': 'relationEnd many',
-        stroke: '#000',
-        fill: 'none',
-        d: this.formatPath([
+      elem = this.path(
+        [
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', 0, -r],
           ['L', -h + r, -r],
           ['A', r, r, 0, 0, 0, -h + r, r],
           ['L', 0, r]
-        ]),
-        transform: transform
-      });
+        ],
+        {
+          'class': 'relationEnd many',
+          stroke: '#000',
+          fill: 'none',
+          transform: transform
+        }
+      );
       break;
     case 'ref':
       var dotCount = 3;
@@ -84,13 +88,14 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
         pathElems.push(['M', -dotLen * 2 * i, 0]);
         pathElems.push(['L', -dotLen * (2 * i + 1), 0]);
       }
-      elem = this.path({
-        'class': 'relationEnd ref',
-        stroke: '#000',
-        fill: 'none',
-        d: this.formatPath(pathElems),
-        transform: transform
-      });
+      elem = this.path(pathElems,
+        {
+          'class': 'relationEnd ref',
+          stroke: '#000',
+          fill: 'none',
+          transform: transform
+        }
+      );
       break;
     case 'inherit':
       var x2 = h * config.oneConnectorEndPosRatio;
@@ -99,16 +104,18 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
         'class': 'relationEnd inherit',
         transform: transform
       }).append(
-        this.path({
-          stroke: '#000',
-          fill: 'none',
-          d: this.formatPath([
+        this.path(
+          [
             ['M', 0, 0],
             ['L', -h, 0],
             ['M', -x2, -w / 2],
             ['L', -x2, w / 2]
-          ])
-        }),
+          ],
+          {
+            stroke: '#000',
+            fill: 'none',
+          }
+        ),
         this.circle({
           cx: -h, cy: 0, r: r, fill: '#000'
         })
