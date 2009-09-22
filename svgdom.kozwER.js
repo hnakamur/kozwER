@@ -18,10 +18,8 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
       var margin = tableConfig.margin;
       x = margin.x;
       y += margin.y;
-      var tableElem = table.call(gErDiagram, x, y, tableConfig.name, {
-        id: tableConfig.id,
-        columns: tableConfig.columns
-      });
+      var tableElem = table.call(gErDiagram, x, y, tableConfig.name,
+          tableConfig);
       config.tableHash[tableConfig.id].nodeWrapper = tableElem;
       var tableRect = tableElem.boundingBox;
       y += tableRect.height;
@@ -149,14 +147,24 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
     rect.setAttr({width: nameBox.width, height: nameBox.height});
 
     var gColumns = gTable.g({'class': 'columns'});
+    var dataRowCount = 0;
+    var gData;
+    if (config.data) {
+      dataRowCount = config.data.length;
+      gData = gTable.g({'class': 'data'});
+    }
     var columnNames = config.columns;
     if (columnNames) {
       var columnCount = columnNames.length;
       x = nameBox.x + nameBox.width + config.tableNameColumnNameMargin;
-      y = yName;
-      var columnBoxes = [];
+      var columnWidth;
       for (var i = 0; i < columnCount; i++) {
         var columnName = columnNames[i];
+        var dataType = undefined;
+        if (config.types && i < config.types.length)
+          dataType = config.types[i];
+
+        y = yName;
         var columnText = gColumns.text({
           x: x,
           y: y,
@@ -165,24 +173,64 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
         });
         columnText.textNode(columnName);
 
+
         var columnBox = columnText.getTextBBox();
-        columnBoxes.push(columnBox);
+        columnWidth = columnBox.width;
 
         if (i < columnCount - 1) {
-          x += columnBox.width;
-
           var separatorText = gColumns.text({
-            x: x,
+            x: x + columnBox.width,
             y: y,
             'text-anchor': 'start',
             'dominant-baseline': 'text-before-edge'
           });
           separatorText.textNode(config.columnSeparator);
-
-          x += config.columnMargin;
         }
+
+        y += columnBox.height;
+
+        if (dataRowCount > 0) {
+          y += config.columnDataMargin;
+          var dataTexts = [];
+          for (var j = 0; j < dataRowCount; j++) {
+            var dataRow = config.data[j];
+            var dataColumnCount = dataRow.length;
+            if (i < dataColumnCount) {
+              var textAnchor = dataType === 'currency' ?  'end' : 'start';
+              var dataText = gData.text({
+                x: x,
+                y: y,
+                'text-anchor': textAnchor,
+                'dominant-baseline': 'text-before-edge'
+              });
+              var dataString = dataType === 'currency' ?
+                  formatCurrency(dataRow[i]) : dataRow[i];
+              dataText.textNode(dataString);
+              dataTexts[j] = dataText;
+
+              var dataBox = dataText.getTextBBox();
+              columnWidth = Math.max(dataBox.width, columnWidth);
+              y += dataBox.height;
+            }
+          }
+          if (dataType === 'currency') {
+            for (var j = 0; j < dataRowCount; j++) {
+              if (dataTexts[j]) {
+                dataTexts[j].setAttr({x: x + columnWidth});
+              }
+            }
+          }
+        }
+
+        x += columnWidth;
+        if (i < columnCount - 1)
+          x += config.columnMargin;
+
+        gTable.boundingBox.width = Math.max(gTable.boundingBox.width,
+            x - nameBox.x);
+        gTable.boundingBox.height = Math.max(gTable.boundingBox.height,
+            y - nameBox.y);
       }
-      gTable.boundingBox.width = x - nameBox.x;
     }
 
     return gTable;
@@ -191,8 +239,26 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
     nameBoxPadding: 4,
     tableNameColumnNameMargin: 8,
     columnSeparator: '、',
-    columnMargin: 12
+    columnMargin: 12,
+    columnDataMargin: 6
   }
+
+  function formatCurrency(n) {
+    var s = '' + n,
+        buf = [],
+        j = 0;
+    for (var i = s.length - 1; i >= 0; i--) {
+      var c = s.charAt(i);
+      buf.unshift(c);
+      if (/\d/.test(c) && ++j == 3 && i - 1 >= 0 &&
+          /\d/.test(s.charAt(i - 1))) {
+        buf.unshift(",");
+        j = 0;
+      }
+    }
+    return buf.join("");
+  }
+
 
   function relationLine(end1, end2, options) {
     if (end1.y > end2.y)
@@ -375,21 +441,20 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
       elem = this.g({
         'class': 'relationEnd inherit',
         transform: transform
-      }).append(
-        this.path({
-          d: this.formatPath([
-            ['M', 0, 0],
-            ['L', -h, 0],
-            ['M', -x2, -w / 2],
-            ['L', -x2, w / 2]
-          ]),
-          stroke: '#000',
-          fill: 'none',
-        }),
-        this.circle({
-          cx: -h, cy: 0, r: r, fill: '#000'
-        })
-      );
+      });
+      elem.path({
+        d: this.formatPath([
+          ['M', 0, 0],
+          ['L', -h, 0],
+          ['M', -x2, -w / 2],
+          ['L', -x2, w / 2]
+        ]),
+        stroke: '#000',
+        fill: 'none'
+      });
+      elem.circle({
+        cx: -h, cy: 0, r: r, fill: '#000'
+      });
       break;
     }
     return elem;

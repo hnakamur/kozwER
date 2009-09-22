@@ -1,0 +1,78 @@
+<html>
+<head>
+<title>モデル6.1 収支取引管理のためのデータモデル</title>
+<script src="../svgweb/src/svg.js" data-path="../svgweb/src/"></script>
+<script src="../svgdom/svgdom.js"></script>
+<script src="svgdom.kozwER.js"></script>
+<script>
+window.onload = function() {
+  var s = svgdom.Element.byId('svg1');
+
+  s.kozwER.erDiagram.call(s, {
+    tables: [
+      {
+        margin: {x: 20, y: 20},
+        id: "himoku_tbl",
+        name: "費目",
+        columns: ["費目C", "費目名", "収支区分", "…"],
+        data: [
+          ["10", "給与収入", "収入"],
+          ["11", "雑収入", "収入"],
+          ["20", "食費", "支出"],
+          ["21", "光熱費", "支出"]
+        ]
+      },
+      {
+        margin: {x: 60, y: 20},
+        id: "monthly_deal_summary_tbl",
+        name: "月次収支取引サマリー",
+        columns: ["費目C", "年月", "取引合計欄", "…"],
+        pkeyColumnCount: 2,
+        types: ["string", "year_month", "currency"],
+        data: [
+          ["10", "XX/05", 0],
+          ["11", "XX/05", 0],
+          ["20", "XX/05", 4900],
+          ["21", "XX/05", 7800]
+        ]
+      },
+      {
+        margin: {x: 100, y: 20},
+        id: "deal_detail_tbl",
+        name: "収支取引明細",
+        columns: ["取引No", "取引日", "費目C", "取引額", "摘要", "(年月)", "…"],
+        types: ["string", "date", "string", "currency", "string", "year_month"],
+        data: [
+          ["01234", "XX/05/02", "20", 2500, "スーパーヤマダ", "XX/05"],
+          ["01235", "XX/05/03", "20", 600, "コンビニKKK", "XX/05"],
+          ["01236", "XX/05/05", "20", 1800, "スーパーヤマダ", "XX/05"],
+          ["01237", "XX/05/05", "21", 7800, "帝国電力引落し", "XX/05"],
+        ]
+      }
+    ],
+    connectors: [
+      {
+        ends: [
+          {table: "himoku_tbl", side: "bottom", cardinality: "one"},
+          {table: "monthly_deal_summary_tbl", side: "left", cardinality: "many"}
+        ]
+      },
+      {
+        ends: [
+          {table: "monthly_deal_summary_tbl", side: "bottom", cardinality: "one"},
+          {table: "deal_detail_tbl", side: "left", cardinality: "ref"}
+        ]
+      }
+    ]
+  });
+};
+</script>
+</head>
+<body>
+  <script type="image/svg+xml">
+    <svg id="svg1" width="1100" height="1000" style="border: 1px solid black;">
+    </svg>
+  </script>
+</body>
+</html>
+
