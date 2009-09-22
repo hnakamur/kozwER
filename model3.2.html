@@ -1,0 +1,58 @@
+<html>
+<head>
+<title>erDiagram</title>
+<script src="../svgweb/src/svg.js" data-path="../svgweb/src/"></script>
+<script src="../svgdom/svgdom.js"></script>
+<script src="svgdom.kozwER.js"></script>
+<script>
+window.onload = function() {
+  var s = svgdom.Element.byId('svg1');
+
+  s.kozwER.erDiagram.call(s, {
+    tables: [
+      {
+        margin: {x: 20, y: 20},
+        id: 'tbl_a',
+        name: 'テーブルA',
+        columns: ['a', 'b', 'c']
+      },
+      {
+        margin: {x: 60, y: 20},
+        id: 'tbl_d',
+        name: 'テーブルD',
+        columns: ['d', 'a', 'e']
+      },
+      {
+        margin: {x: 20, y: 20},
+        id: 'tbl_c',
+        name: 'テーブルC',
+        columns: ['e', 'f', 'g']
+      }
+    ],
+    connectors: [
+      {
+        ends: [
+          {table: 'tbl_a', side: 'bottom', cardinality: 'one'},
+          {table: 'tbl_d', side: 'left', cardinality: 'ref'}
+        ]
+      },
+      {
+        ends: [
+          {table: 'tbl_d', side: 'left', cardinality: 'ref'},
+          {table: 'tbl_c', side: 'top', cardinality: 'one'}
+        ]
+      }
+    ]
+  });
+
+};
+</script>
+</head>
+<body>
+  <script type="image/svg+xml">
+    <svg id="svg1" width="400" height="400" style="border: 1px solid black;">
+    </svg>
+  </script>
+</body>
+</html>
+
