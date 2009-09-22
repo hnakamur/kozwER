@@ -5,6 +5,73 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
       rad2deg = geom.rad2deg,
       deg2rad = geom.deg2rad;
 
+
+  function table(x, y, name, options) {
+    var config = mixin({}, table.defaults, options);
+    var gTable = this.g({'class': 'table'});
+
+    var gName = gTable.g({'class': 'tableName'});
+    var rect = gName.rect({x: x, y: y, width: 1, height: 1,
+        stroke: '#000', fill: 'none'});
+    var xName = x + config.nameBoxPadding,
+        yName = y + config.nameBoxPadding;
+    var text = gName.text({
+      x: xName,
+      y: yName,
+      'text-anchor': 'start',
+      'dominant-baseline': 'text-before-edge'
+    });
+    text.textNode(name);
+
+    var nameBox = gTable.nameBox =
+        geom.insetRect(text.getTextBBox(), -config.nameBoxPadding);
+    rect.setAttr({width: nameBox.width, height: nameBox.height});
+
+    var gColumns = gTable.g({'class': 'columns'});
+    var columnNames = config.columns;
+    if (columnNames) {
+      var columnCount = columnNames.length;
+      x = nameBox.x + nameBox.width + config.tableNameColumnNameMargin;
+      y = yName;
+      var columnBoxes = [];
+      for (var i = 0; i < columnCount; i++) {
+        var columnName = columnNames[i];
+        var columnText = gColumns.text({
+          x: x,
+          y: y,
+          'text-anchor': 'start',
+          'dominant-baseline': 'text-before-edge'
+        });
+        columnText.textNode(columnName);
+
+        var columnBox = columnText.getTextBBox();
+        columnBoxes.push(columnBox);
+
+        if (i < columnCount - 1) {
+          x += columnBox.width;
+
+          var separatorText = gColumns.text({
+            x: x,
+            y: y,
+            'text-anchor': 'start',
+            'dominant-baseline': 'text-before-edge'
+          });
+          separatorText.textNode(config.columnSeparator);
+
+          x += config.columnMargin;
+        }
+      }
+    }
+
+    return gTable;
+  }
+  table.defaults = {
+    nameBoxPadding: 4,
+    tableNameColumnNameMargin: 8,
+    columnSeparator: '、',
+    columnMargin: 12
+  }
+
   function relationLine(end1, end2, options) {
     var config = mixin({}, relationLine.defaults, options);
     var end1 = this.relationEnd(end1.x, end1.y, end1.angle, end1.cardinarity,
@@ -46,39 +113,35 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
     switch (cardinality) {
     case 'one':
       var x2 = h * config.oneConnectorEndPosRatio;
-      elem = this.path(
-        [
+      elem = this.path({
+        'class': 'relationEnd one',
+        d: this.formatPath([
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', -x2, -w / 2],
           ['L', -x2, w / 2]
-        ],
-        {
-          'class': 'relationEnd one',
-          stroke: '#000',
-          fill: 'none',
-          transform: transform
-        }
-      );
+        ]),
+        stroke: '#000',
+        fill: 'none',
+        transform: transform
+      });
       break;
     case 'many':
       var r = w / 2;
-      elem = this.path(
-        [
+      elem = this.path({
+        'class': 'relationEnd many',
+        d: this.formatPath([
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', 0, -r],
           ['L', -h + r, -r],
           ['A', r, r, 0, 0, 0, -h + r, r],
           ['L', 0, r]
-        ],
-        {
-          'class': 'relationEnd many',
-          stroke: '#000',
-          fill: 'none',
-          transform: transform
-        }
-      );
+        ]),
+        stroke: '#000',
+        fill: 'none',
+        transform: transform
+      });
       break;
     case 'ref':
       var dotCount = 3;
@@ -88,14 +151,13 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
         pathElems.push(['M', -dotLen * 2 * i, 0]);
         pathElems.push(['L', -dotLen * (2 * i + 1), 0]);
       }
-      elem = this.path(pathElems,
-        {
-          'class': 'relationEnd ref',
-          stroke: '#000',
-          fill: 'none',
-          transform: transform
-        }
-      );
+      elem = this.path({
+        'class': 'relationEnd ref',
+        d: this.formatPath(pathElems),
+        stroke: '#000',
+        fill: 'none',
+        transform: transform
+      });
       break;
     case 'inherit':
       var x2 = h * config.oneConnectorEndPosRatio;
@@ -104,18 +166,16 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
         'class': 'relationEnd inherit',
         transform: transform
       }).append(
-        this.path(
-          [
+        this.path({
+          d: this.formatPath([
             ['M', 0, 0],
             ['L', -h, 0],
             ['M', -x2, -w / 2],
             ['L', -x2, w / 2]
-          ],
-          {
-            stroke: '#000',
-            fill: 'none',
-          }
-        ),
+          ]),
+          stroke: '#000',
+          fill: 'none',
+        }),
         this.circle({
           cx: -h, cy: 0, r: r, fill: '#000'
         })
@@ -135,6 +195,7 @@ svgdom.mixin(svgdom.Element.prototype, (function() {
   };
 
   return {
+    table: table,
     relationLine: relationLine,
     relationEnd: relationEnd
   };
