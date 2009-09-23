@@ -30,19 +30,26 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
     for (var i = 0; i < connectorCount; i++) {
       var connectorConfig = connectorConfigs[i];
       var endsConfig = connectorConfig.ends;
-      for (var j = 0, endCount = endsConfig.length; j < endCount; j++) {
+      for (var j = 0, endCount = endsConfig.length; j < endCount; ++j) {
         var endConfig = endsConfig[j];
-        var p = connectorEndPoint(config, endConfig);
-        endConfig.x = p.x;
-        endConfig.y = p.y;
-        if (endConfig.side === 'left')
-          endConfig.angle = 0;
-        else if (endConfig.side === 'top')
-          endConfig.angle = 90;
-        else if (endConfig.side === 'bottom')
-          endConfig.angle = 270;
+        if (svgdom.isArray(endConfig)) {
+          for (var k = 0, count = endConfig.length; k < count; ++k)
+            setEndConfigCoordAndAngle(config, endConfig[k]);
+        }
+        else
+          setEndConfigCoordAndAngle(config, endConfig);
       }
-      relationLine.call(gErDiagram, endsConfig[0], endsConfig[1]);
+
+      if (svgdom.isArray(endsConfig[0])) {
+        for (var k = 0, count = endsConfig[0].length; k < count; ++k)
+          relationLine.call(gErDiagram, endsConfig[0][k], endsConfig[1]);
+      }
+      else if (svgdom.isArray(endsConfig[1])) {
+        for (var k = 0, count = endsConfig[1].length; k < count; ++k)
+          relationLine.call(gErDiagram, endsConfig[0], endsConfig[1][k]);
+      }
+      else
+        relationLine.call(gErDiagram, endsConfig[0], endsConfig[1]);
     }
 
     gErDiagram.config = config;
@@ -77,20 +84,29 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
       var endsConfig = connectorConfig.ends;
       for (var j = 0, endCount = endsConfig.length; j < endCount; j++) {
         var endConfig = endsConfig[j];
-        var tableId = endConfig.table;
-        var tableConfig = config.tableHash[tableId];
-        if (tableConfig.ends === undefined)
-          tableConfig.ends = {top: [], left: [], bottom: []};
-        var side = endConfig.side;
-        if (!(side === 'top' || side === 'bottom' || side == 'left'))
-          throw new Error('Invalid endConfig.side');
-        var endsAtSide = tableConfig.ends[side];
-        if (endConfig.index === undefined)
-          endConfig.index = endsAtSide.length;
-        endsAtSide[endConfig.index] = endConfig;
+        if (svgdom.isArray(endConfig)) {
+          for (var k = 0, count = endConfig.length; k < count; ++k)
+            setEndsAtSideOfTable(config, endConfig[k]);
+        }
+        else
+          setEndsAtSideOfTable(config, endConfig);
       }
     }
     return config;
+  }
+
+  function setEndsAtSideOfTable(erDiagramConfig, endConfig) {
+    var tableId = endConfig.table;
+    var tableConfig = erDiagramConfig.tableHash[tableId];
+    if (tableConfig.ends === undefined)
+      tableConfig.ends = {top: [], left: [], bottom: []};
+    var side = endConfig.side;
+    if (!(side === 'top' || side === 'bottom' || side == 'left'))
+      throw new Error('Invalid endConfig.side');
+    var endsAtSide = tableConfig.ends[side];
+    if (endConfig.index === undefined)
+      endConfig.index = endsAtSide.length;
+    endsAtSide[endConfig.index] = endConfig;
   }
 
   function connectorEndPoint(erDiagramConfig, endConfig) {
@@ -120,6 +136,18 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
       break;
     }
     return {x: x, y: y};
+  }
+
+  function setEndConfigCoordAndAngle(erDiagramConfig, endConfig) {
+    var p = connectorEndPoint(erDiagramConfig, endConfig);
+    endConfig.x = p.x;
+    endConfig.y = p.y;
+    if (endConfig.side === 'left')
+      endConfig.angle = 0;
+    else if (endConfig.side === 'top')
+      endConfig.angle = 90;
+    else if (endConfig.side === 'bottom')
+      endConfig.angle = 270;
   }
 
   function table(x, y, name, options) {
@@ -156,7 +184,9 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
     var columnNames = config.columns;
     if (columnNames) {
       var columnCount = columnNames.length;
-      x = nameBox.x + nameBox.width + config.tableNameColumnNameMargin;
+      var pkeyColumnCount = config.pkeyColumnCount || 1;
+      var xFirstColumn = x =
+          nameBox.x + nameBox.width + config.tableNameColumnNameMargin;
       var columnWidth;
       for (var i = 0; i < columnCount; i++) {
         var columnName = columnNames[i];
@@ -173,9 +203,19 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
         });
         columnText.textNode(columnName);
 
-
         var columnBox = columnText.getTextBBox();
         columnWidth = columnBox.width;
+
+        if (i == pkeyColumnCount - 1) {
+          var yLine = y + columnBox.height;
+          gColumns.path({
+            d: this.formatPath([
+              ['M', xFirstColumn, yLine],
+              ['H', x + columnWidth]
+            ]),
+            stroke: '#000'
+          });
+        }
 
         if (i < columnCount - 1) {
           var separatorText = gColumns.text({
@@ -262,7 +302,7 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
 
   function relationLine(end1, end2, options) {
     if (end1.y > end2.y)
-      return relationLine(end2, end1, options);
+      return relationLine.call(this, end2, end1, options);
 
     var config = mixin({}, relationLine.defaults, options);
     var gRelationLine = this.g({'class': config['class']});
