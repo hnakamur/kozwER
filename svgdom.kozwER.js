@@ -1,6 +1,5 @@
-svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
+svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
   var mixin = svgdom.mixin,
-      filterOut = svgdom.filterOut,
       geom = svgdom.geom,
       rad2deg = geom.rad2deg,
       deg2rad = geom.deg2rad;
@@ -155,24 +154,20 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
     var gTable = this.g({'class': 'table'});
 
     var gName = gTable.g({'class': 'tableName'});
-    var rect = gName.rect({
-      x: x, y: y, width: 1, height: 1,
-      stroke: '#000', fill: 'none'
-    });
+    var rect = gName.rect(x, y, 1, 1,
+      { stroke: '#000', fill: 'none' }
+    );
     var xName = x + config.nameBoxPadding,
         yName = y + config.nameBoxPadding;
-    var text = gName.text({
-      x: xName,
-      y: yName,
-      'text-anchor': 'start',
-      'dominant-baseline': 'text-before-edge'
-    });
-    text.textNode(name);
-
+    var text = gName.plainText(xName, yName, name);
+    var nameTextBox = text.getTextBBox();
     var nameBox = gTable.nameBox =
-        geom.insetRect(text.getTextBBox(), -config.nameBoxPadding);
+        geom.insetRect(nameTextBox, -config.nameBoxPadding),
+        yOffset = yName - nameTextBox.y;
+    text.setAttribute('y', yName + yOffset);
+    nameBox.y += yOffset;
     gTable.boundingBox = geom.cloneRect(nameBox);
-    rect.setAttr({width: nameBox.width, height: nameBox.height});
+    rect.setAttributes({ width: nameBox.width, height: nameBox.height });
 
     var gColumns = gTable.g({'class': 'columns'});
     var dataRowCount = 0;
@@ -184,9 +179,11 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
     var columnNames = config.columns;
     if (columnNames) {
       var columnCount = columnNames.length;
+      var columnTexts = [];
       var pkeyColumnCount = config.pkeyColumnCount || 1;
       var xFirstColumn = x =
           nameBox.x + nameBox.width + config.tableNameColumnNameMargin;
+      var pkeyLine;
       var columnWidth;
       for (var i = 0; i < columnCount; i++) {
         var columnName = columnNames[i];
@@ -194,37 +191,33 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
         if (config.types && i < config.types.length)
           dataType = config.types[i];
 
-        y = yName;
-        var columnText = gColumns.text({
-          x: x,
-          y: y,
-          'text-anchor': 'start',
-          'dominant-baseline': 'text-before-edge'
-        });
-        columnText.textNode(columnName);
+        y = yName + yOffset;
+        var columnText = gColumns.plainText(x, y, columnName);
+        columnTexts.push(columnText);
 
         var columnBox = columnText.getTextBBox();
         columnWidth = columnBox.width;
 
         if (i == pkeyColumnCount - 1) {
-          var yLine = y + columnBox.height;
-          gColumns.path({
-            d: this.formatPath([
+          var yLine = y + config.pKeyLineOffset;
+          pKeyLine = gColumns.path(
+            [
               ['M', xFirstColumn, yLine],
               ['H', x + columnWidth]
-            ]),
-            stroke: '#000'
-          });
+            ]
+          );
+          gColumns.insertBefore(pKeyLine, columnTexts[0]);
         }
 
         if (i < columnCount - 1) {
-          var separatorText = gColumns.text({
-            x: x + columnBox.width,
-            y: y,
-            'text-anchor': 'start',
-            'dominant-baseline': 'text-before-edge'
-          });
-          separatorText.textNode(config.columnSeparator);
+          var separatorText = gColumns.plainText(
+            x + columnBox.width, y, config.columnSeparator
+          );
+        }
+
+        if (columnBox.height != nameTextBox.height) {
+          y -= columnBox.height - nameTextBox.height;
+          columnText.setAttribute('y', y);
         }
 
         y += columnBox.height;
@@ -237,27 +230,22 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
             var dataColumnCount = dataRow.length;
             if (i < dataColumnCount) {
               var textAnchor = dataType === 'currency' ?  'end' : 'start';
-              var dataText = gData.text({
-                x: x,
-                y: y,
-                'text-anchor': textAnchor,
-                'dominant-baseline': 'text-before-edge'
-              });
               var dataString = dataType === 'currency' ?
                   formatCurrency(dataRow[i]) : dataRow[i];
-              dataText.textNode(dataString);
+              var dataText = gData.plainText(x, y, dataString);
               dataTexts[j] = dataText;
 
               var dataBox = dataText.getTextBBox();
+              dataText.width = dataBox.width;
               columnWidth = Math.max(dataBox.width, columnWidth);
               y += dataBox.height;
             }
           }
           if (dataType === 'currency') {
             for (var j = 0; j < dataRowCount; j++) {
-              if (dataTexts[j]) {
-                dataTexts[j].setAttr({x: x + columnWidth});
-              }
+              var dataText = dataTexts[j];
+              if (dataText)
+                dataText.setAttribute('x', x + columnWidth - dataText.width);
             }
           }
         }
@@ -278,6 +266,7 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
   table.defaults = {
     nameBoxPadding: 4,
     tableNameColumnNameMargin: 8,
+    pKeyLineOffset: 4,
     columnSeparator: '、',
     columnMargin: 12,
     columnDataMargin: 6
@@ -331,16 +320,6 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
       case 'bottom':
         break;
       case 'left':
-        gRelationLine.path({
-          d: this.formatPath([
-            ["M", p1.x, p1.y],
-            ["L", p1.x, p2.y - r],
-            ["A", r, r, 0, 0, 1, p1.x + r, p2.y],
-            ["L", p2.x, p2.y]
-          ]),
-          stroke: config.stroke,
-          fill: config.fill
-        });
         break;
       }
       break;
@@ -351,59 +330,43 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
       case 'bottom':
         break;
       case 'left':
-        gRelationLine.path({
-          d: this.formatPath([
+        gRelationLine.path(
+          [
             ["M", p1.x, p1.y],
             ["L", p1.x, p2.y - r],
             ["A", r, r, 0, 0, 0, p1.x + r, p2.y],
             ["L", p2.x, p2.y]
-          ]),
-          stroke: config.stroke,
-          fill: config.fill
-        });
+          ]
+        );
         break;
       }
       break;
     case 'left':
       switch (end2.side) {
       case 'top':
-        gRelationLine.path({
-          d: this.formatPath([
+        gRelationLine.path(
+          [
             ["M", p2.x, p2.y],
             ["L", p2.x, p1.y + r],
             ["A", r, r, 0, 0, 1, p2.x + r, p1.y],
             ["L", p1.x, p1.y]
-          ]),
-          stroke: config.stroke,
-          fill: config.fill
-        });
+          ]
+        );
         break;
       case 'bottom':
-        gRelationLine.path({
-          d: this.formatPath([
-            ["M", p2.x, p2.y],
-            ["L", p2.x, p1.y - r],
-            ["A", r, r, 0, 0, 0, p2.x + r, p1.y],
-            ["L", p1.x, p1.y]
-          ]),
-          stroke: config.stroke,
-          fill: config.fill
-        });
         break;
       case 'left':
         var x = p1.x - config.inheritConnectorOffsetX;
-        gRelationLine.path({
-          d: this.formatPath([
+        gRelationLine.path(
+          [
             ["M", p1.x, p1.y],
             ["L", x + r, p1.y],
             ["A", r, r, 0, 0, 0, x, p1.y + r],
             ["L", x, p2.y - r],
             ["A", r, r, 0, 0, 0, x + r, p2.y],
             ["L", p2.x + r, p2.y]
-          ]),
-          stroke: config.stroke,
-          fill: config.fill
-        });
+          ]
+        );
         break;
       }
       break;
@@ -429,35 +392,35 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
     switch (cardinality) {
     case 'one':
       var x2 = h * config.oneConnectorEndPosRatio;
-      elem = this.path({
-        'class': 'relationEnd one',
-        d: this.formatPath([
+      elem = this.path(
+        [
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', -x2, -w / 2],
           ['L', -x2, w / 2]
-        ]),
-        stroke: '#000',
-        fill: 'none',
-        transform: transform
-      });
+        ],
+        {
+          'class': 'relationEnd one',
+          transform: transform
+        }
+      );
       break;
     case 'many':
       var r = w / 2;
-      elem = this.path({
-        'class': 'relationEnd many',
-        d: this.formatPath([
+      elem = this.path(
+        [
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', 0, -r],
           ['L', -h + r, -r],
           ['A', r, r, 0, 0, 0, -h + r, r],
           ['L', 0, r]
-        ]),
-        stroke: '#000',
-        fill: 'none',
-        transform: transform
-      });
+        ],
+        {
+          'class': 'relationEnd many',
+          transform: transform
+        }
+      );
       break;
     case 'ref':
       var dotCount = 3;
@@ -467,13 +430,13 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
         pathElems.push(['M', -dotLen * 2 * i, 0]);
         pathElems.push(['L', -dotLen * (2 * i + 1), 0]);
       }
-      elem = this.path({
-        'class': 'relationEnd ref',
-        d: this.formatPath(pathElems),
-        stroke: '#000',
-        fill: 'none',
-        transform: transform
-      });
+      elem = this.path(
+        pathElems,
+        {
+          'class': 'relationEnd ref',
+          transform: transform
+        }
+      );
       break;
     case 'inherit':
       var x2 = h * config.oneConnectorEndPosRatio;
@@ -482,19 +445,15 @@ svgdom.mixin(svgdom.NodeWrapper.prototype, (function() {
         'class': 'relationEnd inherit',
         transform: transform
       });
-      elem.path({
-        d: this.formatPath([
+      elem.path(
+        [
           ['M', 0, 0],
           ['L', -h, 0],
           ['M', -x2, -w / 2],
           ['L', -x2, w / 2]
-        ]),
-        stroke: '#000',
-        fill: 'none'
-      });
-      elem.circle({
-        cx: -h, cy: 0, r: r, fill: '#000'
-      });
+        ]
+      );
+      elem.circle(-h, 0, r, { fill: '#000', stroke: 'none' });
       break;
     }
     return elem;

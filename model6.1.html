@@ -6,7 +6,7 @@
 <script src="svgdom.kozwER.js"></script>
 <script>
 window.onload = function() {
-  var s = svgdom.NodeWrapper.byId('svg1');
+  var s = svgdom.ElementWrapper.byId('svg1');
 
   s.kozwER.erDiagram.call(s, {
     tables: [
@@ -65,6 +65,8 @@ window.onload = function() {
       }
     ]
   });
+
+  svgdom.ElementWrapper.unwrapAll();
 };
 </script>
 </head>
