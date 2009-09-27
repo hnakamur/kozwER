@@ -238,7 +238,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
               var dataBox = dataText.getTextBBox();
               dataText.width = dataBox.width;
               columnWidth = Math.max(dataBox.width, columnWidth);
-              y += dataBox.height;
+              y += dataBox.height + config.dataRowMargin;
             }
           }
           if (dataType === 'currency') {
@@ -269,7 +269,8 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
     pKeyLineOffset: 4,
     columnSeparator: '、',
     columnMargin: 12,
-    columnDataMargin: 6
+    columnDataMargin: 6,
+    dataRowMargin: 4
   }
 
   function formatCurrency(n) {
@@ -378,16 +379,14 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
     'class': 'relationLine',
     relationEndLength: 10,
     connectorCornerRadius: 10,
-    inheritConnectorOffsetX: 20,
-    stroke: '#000',
-    fill: 'none'
+    inheritConnectorOffsetX: 20
   };
 
   function relationEnd(x, y, angle, cardinality, options) {
     var config = mixin({}, relationEnd.defaults, options);
     var h = config.relationEndLength;
     var w = h * config.relationEndWidthRatio;
-    var transform = this.rotateThenTranslateTransform(x, y, angle);
+    var transform = [['translate', x, y], ['rotate', angle]];
     var elem;
     switch (cardinality) {
     case 'one':
@@ -399,10 +398,8 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
           ['M', -x2, -w / 2],
           ['L', -x2, w / 2]
         ],
-        {
-          'class': 'relationEnd one',
-          transform: transform
-        }
+        { 'class': 'relationEnd one' },
+        { transform: transform }
       );
       break;
     case 'many':
@@ -416,10 +413,8 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
           ['A', r, r, 0, 0, 0, -h + r, r],
           ['L', 0, r]
         ],
-        {
-          'class': 'relationEnd many',
-          transform: transform
-        }
+        { 'class': 'relationEnd many' },
+        { transform: transform }
       );
       break;
     case 'ref':
@@ -432,19 +427,17 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
       }
       elem = this.path(
         pathElems,
-        {
-          'class': 'relationEnd ref',
-          transform: transform
-        }
+        { 'class': 'relationEnd ref' },
+        { transform: transform }
       );
       break;
     case 'inherit':
       var x2 = h * config.oneConnectorEndPosRatio;
       var r = h * config.inheritConnectorEndRadiusRatio;
-      elem = this.g({
-        'class': 'relationEnd inherit',
-        transform: transform
-      });
+      elem = this.g(
+        { 'class': 'relationEnd inherit' },
+        { transform: transform }
+      );
       elem.path(
         [
           ['M', 0, 0],
@@ -460,8 +453,6 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
   }
   relationEnd.defaults = {
     'class': 'relationEnd',
-    stroke: '#000',
-    fill: 'none',
     relationEndLength: 10,
     relationEndWidthRatio: 0.6,
     oneConnectorEndPosRatio: 0.4,
