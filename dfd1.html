@@ -1,0 +1,95 @@
+<html>
+<head>
+<title>DFDサンプル</title>
+<script src="../svgweb/src/svg.js" data-path="../svgweb/src/"></script>
+<script src="../svgdom/svgdom.js"></script>
+<script src="../svgdom/svgdom.myExt.js"></script>
+<script src="svgdom.kozwER.dfd.js"></script>
+<script>
+window.onload = function() {
+  var s = svgdom.ElementWrapper.byId('svg1');
+
+  var taskUnitDefaults = s.dfdDiagram.defaultOptions['taskUnit'];
+  var unitRx = taskUnitDefaults.rx;
+  var unitRy = taskUnitDefaults.ry;
+
+  var elems = [];
+
+  var x = 100;
+  var y = 145;
+//  s.ellipseStar(x - unitRx, y - unitRy, unitRx, unitRy);
+//  s.kozwER.taskUnit(x, y, '収支取引\nの登録');
+  s.taskTrigger(x - unitRx, y - unitRy, '週次');
+
+//  s.kozwER.notebook(260, 70, '取引\n集計簿');
+//
+//  s.kozwER.notebook(260, 220, '収支\n取引簿');
+//
+//  x = 450;
+//  y = 145;
+//  s.kozwER.taskUnit(x, y, '費目別予算\nの登録');
+//  s.kozwER.taskTrigger(x - unitRx, y - unitRy, '随時');
+//
+//  s.kozwER.curve(
+//    [100, 145 - (unitRy + 10), 120, 70, 260 - unitRx, 70],
+//    {arrow: {end: true}}
+//  );
+//  s.text(150, 60, '費目別実績');
+//
+//  s.kozwER.curve(
+//    [100, 145 + (unitRy + 10), 120, 220, 260 - unitRx, 220],
+//    {arrow: {end: true}}
+//  );
+//  s.text(150, 230, '収支取引');
+//
+////  s.kozwER.curve(
+////    [450, 145 - (unitRy + 10), 430, 70, 260 + unitRx, 70],
+////    {arrow: {end: true}}
+////  );
+//  s.text(380, 60, '費目別予算');
+//  s.kozwER.curve(
+//    [260 + unitRx, 70, 430, 70, 450, 145 - (unitRy + 10)],
+//    {arrow: {start: true}}
+//  );
+//
+//  var elemSet = paper.set(elems).translate(100, 0);
+
+// paper.attr({'class': 'hoge', 'font-family': 'Helvetica', 'font-size': 14});
+/*
+  paper.kozw.dfdDiagram({
+    tasks: [
+      {
+        id: 'receive_order_task',
+        name: '受注受付',
+        job_role: '受注担当者',
+        occurrence_condition: '注文を受けた!'
+      }
+    ],
+    storages: [
+      {
+        id: 'order_ledger',
+        name: '受注簿'
+      }
+    ],
+    flows: [
+      {
+        source_id: 'receive_order_task',
+        destination_id: 'order_ledger',
+        bidirectional: true
+      }
+    ]
+  });
+*/
+
+  svgdom.ElementWrapper.unwrapAll();
+};
+</script>
+</head>
+<body>
+  <script type="image/svg+xml">
+    <svg id="svg1" width="1200" height="1000" style="border: 1px solid black;">
+    </svg>
+  </script>
+</body>
+</html>
+
