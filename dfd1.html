@@ -9,7 +9,7 @@
 window.onload = function() {
   var s = svgdom.ElementWrapper.byId('svg1');
 
-  var taskUnitDefaults = s.dfdDiagram.defaultOptions['taskUnit'];
+  var taskUnitDefaults = s.taskUnit.defaultOptions;
   var unitRx = taskUnitDefaults.rx;
   var unitRy = taskUnitDefaults.ry;
 
@@ -18,10 +18,12 @@ window.onload = function() {
   var x = 100;
   var y = 145;
 //  s.ellipseStar(x - unitRx, y - unitRy, unitRx, unitRy);
-//  s.kozwER.taskUnit(x, y, '収支取引\nの登録');
-  s.taskTrigger(x - unitRx, y - unitRy, '週次');
+  s.taskUnit(x, y, '収支取引\nの登録');
+  var trg = s.taskTrigger(x, y, '週次');
+  var trgBox = trg.getBBox();
+  trg.moveElement({dx: -trgBox.width / 2, dy: -trgBox.height / 2});
 
-//  s.kozwER.notebook(260, 70, '取引\n集計簿');
+  s.notebook(260, 70, '取引\n集計簿');
 //
 //  s.kozwER.notebook(260, 220, '収支\n取引簿');
 //

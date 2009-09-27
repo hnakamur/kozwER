@@ -1,98 +1,104 @@
-svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
-  var mixin = svgdom.mixin,
+svgdom.extend(svgdom.ElementWrapper.prototype, (function() {
+  var extend = svgdom.extend,
+      filter = svgdom.filter,
       geom = svgdom.geom;
 
   function dfdDiagram(settings) {
   }
-  dfdDiagram.defaultOptions = {
-    taskTrigger: {
-      rx: 40,
-      ry: 30
-    },
-    taskUnit: {
-      rx: 50,
-      ry: 35
-    }
-  };
 
-  var Defaults = {
-    taskTrigger: {
-      rx: 40,
-      ry: 30,
-      fill: '#fff'
-    },
-    taskUnit: {
-      fill: '#eee'
-    },
-    notebook: {
-      width: 60,
-      height: 80,
-      angle: 5,
-      pageCount: 3,
-      pageOffset: 2,
-      fill: '#fff',
-      r: 5
-    }
-  }
 
   function taskTrigger(x, y, text, options) {
-    var config = mixin({}, taskTrigger.defaultOptions, options);
+    var config = extend({}, taskTrigger.defaultOptions, options);
     var g = this.g({ 'class': config['class'] });
-    var star = g.ellipseStar(x, y, config.rx, config.ry, options);
-    var text = g.plainText(x, y, text);
-    star.alignElements(text, 0.5, 0.5);
+    var star = g.ellipseStar(0, 0, config.rx, config.ry,
+      filter(config, ['stroke', 'fill'])
+    );
+    var text = g.plainText(0, 0, text, undefined, {textAlign: 'center'});
+    star.alignElements(text, 'center', 'middle');
+    g.moveElement(x, y);
     return g;
   }
   taskTrigger.defaultOptions = {
     'class': 'taskTrigger',
     rx: 40,
-    ry: 30
+    ry: 30,
+    stroke: '#000',
+    fill: '#fff'
   };
 
   function taskUnit(x, y, text, options) {
-    var config = extend({}, Defaults.taskUnit, options);
-    return this.set([
-      this.ellipse(x, y, config.rx, config.ry).attr({fill: config.fill}),
-      this.text(x, y, text)
-    ]);
+    var config = extend({}, taskUnit.defaultOptions, options);
+    var g = this.g({'class': config['class']});
+    var ellipse = g.ellipse(0, 0, config.rx, config.ry,
+      filter(config, ['stroke', 'fill']), options
+    );
+    var text = g.plainText(0, 0, text, undefined, {textAlign: 'center'});
+    ellipse.alignElements(text, 'center', 'middle');
+    g.moveElement(x, y);
+    return g;
   }
+  taskUnit.defaultOptions = {
+    'class': 'taskUnit',
+    rx: 60,
+    ry: 48,
+    stroke: '#000',
+    fill: '#eee'
+  };
 
   function notebook(x, y, text, options) {
-    var config = extend({}, Defaults.notebook, options);
+    var config = extend({}, notebook.defaults, options);
+    var g = this.g(filter(config, 'class'));
     var w = config.width;
     var h = config.height;
-    var slantRad = deg2rad(config.angle);
-    var wSlant = h * Math.tan(slantRad);
-    var x0 = x - w / 2 + wSlant / 2;
-    var y0 = y - h / 2;
-    var elems = [];
+    var pageOffset = config.pageOffset;
+    var gPages = g.g({
+        'class': 'pages', fill: config.fill, stroke: config.stroke});
     for (var i = config.pageCount - 1; i >= 0; i--) {
-      elems.push(_path.call(this, [
-        ["M", x0 + i * config.pageOffset, y0 + i * config.pageOffset],
-        ["l", w, 0, w - wSlant, h, -wSlant, h],
-        ["z"]
-      ]).attr({fill: config.fill}));
+      var offset = i * pageOffset;
+      gPages.rect(0, 0, w, h, {
+        transform: [
+          ['translate', offset, offset],
+          ['skewX', -config.angle]],
+        fill: undefined,
+        stroke: undefined
+      });
     }
 
+    var slantRad = geom.deg2rad(config.angle);
+    var wSlant = h * Math.tan(slantRad);
     var r = config.r;
-    var x1 = x0 + r;
-    var y1 = y0 + 2 * r;
     var xOff = wSlant / h * r;
     var ringRad = slantRad + Math.PI / 2;
     var rc = r * Math.cos(ringRad);
     var rs = r * Math.sin(ringRad);
-    var pathElems = [];
+    var gRings = g.g({'class': 'rings', fill: 'none', stroke: config.stroke});
     for (i = 0, len = h / r - 3; i < len; i++) {
-      pathElems.push(["M", x1 - i * xOff, y1 + i * r]);
-      pathElems.push(["a", r, r, 0, 1, 0, rc - r, rs]);
+      gRings.path([['M', r, 0], ['A', r, r, 0, 1, 0, rc, rs]],
+        {transform: ['translate', -i * xOff, (i + 2) * r],
+         fill: undefined, stroke: undefined}
+      );
     }
-    elems.push(_path.call(this, pathElems));
-    elems.push(this.text(x, y, text));
-    return this.set(elems);
+
+    var text = g.plainText(0, 0, text, {textAlign: 'center'});
+    gPages.lastChild().alignElements(text, 'center', 'middle');
+
+    g.moveElement(x, y);
+    return g;
   }
+  notebook.defaults = {
+    'class': 'notebook',
+    width: 80,
+    height: 100,
+    angle: 5,
+    pageCount: 3,
+    pageOffset: 2,
+    stroke: '#000',
+    fill: '#fff',
+    r: 5
+  };
 
   function ellipseStar(x, y, rx, ry, options) {
-    var config = mixin({}, ellipseStar.defaultOptions, options);
+    var config = extend({}, ellipseStar.defaultOptions, options);
     var n2 = config.n * 2;
     var innerRx = rx * config.innerRadiusRatio;
     var innerRy = ry * config.innerRadiusRatio;
@@ -102,7 +108,10 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
       points.push((i % 2 ? innerRx : rx) * Math.cos(theta));
       points.push((i % 2 ? innerRy : ry) * Math.sin(theta));
     }
-    return this.polygon(points, undefined, { transform: ['translate', x, y] });
+    return this.polygon(points,
+      filter(config, ['stroke', 'fill']),
+      { transform: ['translate', x, y] }
+    );
   }
   ellipseStar.defaultOptions = {
     n: 16,

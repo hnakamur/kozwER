@@ -1,5 +1,5 @@
-svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
-  var mixin = svgdom.mixin,
+svgdom.extend(svgdom.ElementWrapper.prototype, (function() {
+  var extend = svgdom.extend,
       geom = svgdom.geom,
       rad2deg = geom.rad2deg,
       deg2rad = geom.deg2rad;
@@ -66,7 +66,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
   };
 
   function buildErDiagramConfig(settings) {
-    var config = mixin({}, erDiagram.defaults, settings);
+    var config = extend({}, erDiagram.defaults, settings);
     var tableConfigs = config.tables;
     var tableCount = tableConfigs.length;
 
@@ -150,7 +150,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
   }
 
   function table(x, y, name, options) {
-    var config = mixin({}, table.defaults, options);
+    var config = extend({}, table.defaults, options);
     var gTable = this.g({'class': 'table'});
 
     var gName = gTable.g({'class': 'tableName'});
@@ -294,7 +294,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
     if (end1.y > end2.y)
       return relationLine.call(this, end2, end1, options);
 
-    var config = mixin({}, relationLine.defaults, options);
+    var config = extend({}, relationLine.defaults, options);
     var gRelationLine = this.g({'class': config['class']});
     var end1Elem = relationEnd.call(gRelationLine, end1.x, end1.y, end1.angle,
         end1.cardinality, options && options.end1);
@@ -383,7 +383,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
   };
 
   function relationEnd(x, y, angle, cardinality, options) {
-    var config = mixin({}, relationEnd.defaults, options);
+    var config = extend({}, relationEnd.defaults, options);
     var h = config.relationEndLength;
     var w = h * config.relationEndWidthRatio;
     var transform = [['translate', x, y], ['rotate', angle]];
@@ -398,8 +398,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
           ['M', -x2, -w / 2],
           ['L', -x2, w / 2]
         ],
-        { 'class': 'relationEnd one' },
-        { transform: transform }
+        { 'class': 'relationEnd one', transform: transform }
       );
       break;
     case 'many':
@@ -413,8 +412,7 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
           ['A', r, r, 0, 0, 0, -h + r, r],
           ['L', 0, r]
         ],
-        { 'class': 'relationEnd many' },
-        { transform: transform }
+        { 'class': 'relationEnd many', transform: transform }
       );
       break;
     case 'ref':
@@ -427,16 +425,14 @@ svgdom.mixin(svgdom.ElementWrapper.prototype, (function() {
       }
       elem = this.path(
         pathElems,
-        { 'class': 'relationEnd ref' },
-        { transform: transform }
+        { 'class': 'relationEnd ref', transform: transform }
       );
       break;
     case 'inherit':
       var x2 = h * config.oneConnectorEndPosRatio;
       var r = h * config.inheritConnectorEndRadiusRatio;
       elem = this.g(
-        { 'class': 'relationEnd inherit' },
-        { transform: transform }
+        { 'class': 'relationEnd inherit', transform: transform }
       );
       elem.path(
         [
